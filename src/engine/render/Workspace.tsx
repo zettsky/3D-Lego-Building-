@@ -154,9 +154,13 @@ export const Workspace = forwardRef<WorkspaceHandle, WorkspaceProps>(function Wo
       dpr={[1, 2]}
       gl={{ antialias: true, alpha: true, preserveDrawingBuffer: true }}
       camera={{ fov: 35, near: 0.1, far: 800, position: initial.pos.toArray() as Vec3 }}
-      onCreated={({ gl, camera }) => {
+      onCreated={({ gl, camera, size }) => {
         glRef.current = gl;
         camRef.current = camera as THREE.PerspectiveCamera;
+        // Re-frame with the real aspect ratio (portrait phones need more distance).
+        const aspect = size.width / Math.max(1, size.height);
+        const dist = distanceFor(boundsRadius(frame), 35, aspect);
+        camera.position.copy(initial.target.clone().add(VIEW_DIR.clone().multiplyScalar(dist)));
         gl.toneMapping = THREE.ACESFilmicToneMapping;
         gl.toneMappingExposure = 1.05;
       }}

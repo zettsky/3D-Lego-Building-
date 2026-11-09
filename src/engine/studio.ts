@@ -30,6 +30,7 @@ export type StudioAction =
   | { type: "PICK_PART"; partId: string; colorId: string }
   | { type: "ROTATE" }
   | { type: "PLACE"; anchor: { x: number; z: number } }
+  | { type: "DROP"; partId: string; colorId: string; anchor: { x: number; z: number } }
   | { type: "SELECT"; uid: string | null }
   | { type: "DELETE" }
   | { type: "DUPLICATE" }
@@ -96,6 +97,12 @@ export function studioReducer(s: StudioState, a: StudioAction): StudioState {
       const next = [...bricks, cand.brick];
       const stillHave = canTake(s.inventory, next, s.active.partId, s.active.colorId);
       return { ...s, history: pushHistory(s.history, next), active: stillHave ? s.active : null, message: null };
+    }
+    case "DROP": {
+      if (s.moving) return msg(s, "Place or cancel the brick you are moving first.");
+      if (!canTake(s.inventory, bricks, a.partId, a.colorId)) return msg(s, "None of those left in this set.");
+      const withPart = { ...s, active: { partId: a.partId, colorId: a.colorId, rot: s.active?.rot ?? 0 } as ActivePart, selected: null };
+      return studioReducer(withPart, { type: "PLACE", anchor: a.anchor });
     }
     case "SELECT":
       if (s.moving) return s;

@@ -67,7 +67,7 @@ export default function HeroScene() {
     <Canvas
       shadows
       dpr={[1, 2]}
-      camera={{ fov: 30, position: [9, 9, 11] }}
+      camera={{ fov: 28, position: [14, 12, 17] }}
       gl={{ alpha: true, antialias: true }}
       onCreated={({ gl, camera }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping;
