@@ -84,10 +84,13 @@ Rules:
 | Section | Manual steps | Pages | Status |
 | --- | --- | --- | --- |
 | Snoopy: torso, legs, belly (bag 1) | 1–27 | 11–26 | steps 1–2 transcribed and checked |
-| Snoopy: head (bags 2–3) | 28–78 | 27–59 | not started |
-| Woodstock | W1–W11 | 60–62 | not started |
-| Lawn (bag 4) | 79–127 | 64–96 | not started (an earlier approximate version exists) |
-| Night sky (bag 5) | 128–162 | 97–116 | not started (approximate version exists) |
-| Doghouse (bags 6–9) | 163–225 | 117–174 | not started (approximate version exists) |
-| Typewriter display (bag 10) | 226–254 | 176–205 | not started |
+| Snoopy: head (bags 2–3) | 28–78 | 27–59 | steps 29–38 transcribed (side panel A partly); 39–78 to do |
+| Woodstock | W1–W11 | 60–62 | done (roof attach pose TODO); 5648 head is the only hand-made part shape |
+| Lawn (bag 4) | 79–127 | 64–96 | not started |
+| Night sky (bag 5) | 128–162 | 97–116 | not started |
+| Doghouse (bags 6–9) | 163–225 | 117–174 | steps 163–177 transcribed (back wall, ceiling); 178–225 to do |
+| Typewriter display (bag 10) | 226–254 | 183–205 | steps 226–234 transcribed; 235–254 to do |
 | Campfire display (bag 10) | 226–244 | 206–224 | not started |
+
+The parallel sessions were stopped on 2026-11-10 to save usage; the remaining steps continue in a
+single session, in manual order, following the same rules.

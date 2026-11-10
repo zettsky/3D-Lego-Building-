@@ -84,7 +84,7 @@ const BOXY = new Set(["brick", "plate", "tile", "panel"]);
 
 function isBoxy(partId: string): boolean {
   const p = getPart(partId);
-  return BOXY.has(p.category) && !/Round|Curved|Wedge|Macaroni|Dish|with Handle|Clip|Bar|Hole/i.test(p.name);
+  return BOXY.has(p.category) && !/Round|Curved|Wedge|Macaroni|Dish|with Handle|Clip|Bar|Hole|Corner/i.test(p.name);
 }
 
 /** Which bricks touch: their boxes (grown by `pad`) overlap. */
