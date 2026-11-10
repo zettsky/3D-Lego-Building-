@@ -24,7 +24,7 @@ interface RigApi {
   focusTarget(target: THREE.Vector3): void;
 }
 
-const VIEW_DIR = new THREE.Vector3(1.1, 0.95, -1.45).normalize();
+const DEFAULT_VIEW = new THREE.Vector3(1.1, 0.95, -1.45).normalize();
 
 function distanceFor(radius: number, fov: number, aspect: number) {
   const vfov = THREE.MathUtils.degToRad(fov);
@@ -102,13 +102,16 @@ export interface WorkspaceProps {
   className?: string;
   onPointerMissed?: () => void;
   autoRotate?: boolean;
+  /** Direction from the target to the camera (default: front-right, slightly above). */
+  view?: Vec3;
 }
 
 export const Workspace = forwardRef<WorkspaceHandle, WorkspaceProps>(function Workspace(
-  { children, center, frame, mat = "paper", plateSize = 16, className, onPointerMissed, autoRotate = false },
+  { children, center, frame, mat = "paper", plateSize = 16, className, onPointerMissed, autoRotate = false, view },
   ref,
 ) {
   const ready = useLdrawReady();
+  const VIEW_DIR = useMemo(() => (view ? new THREE.Vector3(...view).normalize() : DEFAULT_VIEW), [view]);
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
   const apiRef = useRef<RigApi | null>(null);
   const glRef = useRef<THREE.WebGLRenderer | null>(null);

@@ -92,7 +92,7 @@ export const CATALOG: SetEntry[] = [
     instruction: SNOOPY_DOGHOUSE,
     official: true,
     coverage:
-      "This model covers the doghouse: manual steps 79–225 (bags 4–9). Snoopy, Woodstock, the typewriter and the campfire are not modelled yet. Hidden inner bricks are a best reading of the pictures.",
+      "This is an approximate model of the doghouse (manual steps 79–225): its outside follows the manual, but not every step and part was transcribed, so hidden bricks differ. An exact, part-by-part transcription of the whole set, Snoopy and Woodstock included, is in progress and will replace it.",
     modelPieces: totalPieces(instructionInventory(SNOOPY_DOGHOUSE)),
   },
   real("10281", "Bonsai Tree", "Icons", 878, 2021, ["botanical", "plant", "tree", "flowers"], "Botanical Collection"),

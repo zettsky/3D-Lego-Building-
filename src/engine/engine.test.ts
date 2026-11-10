@@ -307,3 +307,52 @@ describe("Snoopy's Doghouse (21368, steps 79–225)", () => {
     expect(box.max[0] - box.min[0]).toBeLessThan(25); // nothing left staged off to the side
   });
 });
+
+// ── Phase 3: LDraw geometry and the 21368 transcription ─────────────────────
+import { LEGO_21368 } from "@/data/sets/21368";
+import { BOM_21368, BOM_TOOLS } from "@/data/sets/21368/bom";
+import { validatePosed } from "./connect";
+import { ldFootprint, ldPartDef } from "./ldraw/library";
+import { placements as framePlacements } from "./frames";
+
+describe("LDraw part library", () => {
+  it("derives grid footprints and stud points from real geometry", () => {
+    expect(ldPartDef("3001")).toMatchObject({ w: 4, d: 2, h: 3 });
+    expect(ldPartDef("3001").studPoints).toHaveLength(8);
+    expect(ldPartDef("3024")).toMatchObject({ w: 1, d: 1, h: 1 });
+    const slope = ldFootprint("54200"); // origin at the bottom of this part
+    expect(slope.bottom - slope.top).toBe(16);
+  });
+});
+
+describe("21368 transcription", () => {
+  const bom = new Map<string, number>();
+  for (const l of BOM_21368) if (!BOM_TOOLS.has(l.element)) bom.set(`${l.part}|${l.color}`, (bom.get(`${l.part}|${l.color}`) ?? 0) + l.qty);
+  const used = new Map<string, number>();
+  for (const b of allBricks(LEGO_21368)) used.set(`${b.partId}|${b.colorId}`, (used.get(`${b.partId}|${b.colorId}`) ?? 0) + 1);
+
+  it("the parts list has 963 model pieces", () => {
+    expect([...bom.values()].reduce((s, q) => s + q, 0)).toBe(963);
+  });
+  it("uses only parts from the manual's parts list, never more than it contains", () => {
+    for (const [k, q] of used) {
+      expect(bom.has(k), `${k} is not in the parts list`).toBe(true);
+      expect(q, `${k} used ${q}×, parts list has ${bom.get(k)}`).toBeLessThanOrEqual(bom.get(k)!);
+    }
+  });
+  it("every part sits in an LDraw pose and the model holds together", () => {
+    const all = allBricks(LEGO_21368);
+    expect(all.every((b) => b.pose)).toBe(true);
+    // world space, finished model: each sub-assembly's parts are connected
+    const fm = frameMap(LEGO_21368.frames);
+    const world = framePlacements(all, fm).map(({ brick, matrix }) => ({ brick, matrix }));
+    expect(world.length).toBe(all.length);
+    const byFrame = new Map<string, typeof all>();
+    for (const b of all) byFrame.set(b.frame ?? "", [...(byFrame.get(b.frame ?? "") ?? []), b]);
+    for (const [frame, list] of byFrame) {
+      const { issues, components } = validatePosed(list, LEGO_21368.joins ?? []);
+      expect(issues.filter((i) => i.kind === "collision" || i.kind === "join-gap"), frame).toEqual([]);
+      expect(components.length, `${frame}: ${components.length} separate groups`).toBe(1);
+    }
+  });
+});

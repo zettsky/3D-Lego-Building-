@@ -5,6 +5,7 @@
 import { validateAssembly, type AssemblyIssue, type Box3, type BrickInstance } from "./assembly";
 import { inventoryFromBricks, type InventoryLine } from "./inventory";
 import { frameMap, frameOrder, worldBounds, type FrameDef } from "./frames";
+import type { Join } from "./connect";
 
 export interface InstructionStep {
   bricks: BrickInstance[];
@@ -23,6 +24,8 @@ export interface Instruction {
   provenance: "hand-authored" | "ldraw-import" | "manual-transcription";
   /** Sub-assemblies (see frames.ts). */
   frames?: FrameDef[];
+  /** Non-stud connections between posed parts (clips, pins, axles…), see connect.ts. */
+  joins?: Join[];
 }
 
 /** World bounds of the bricks placed up to `stepIndex`, with sub-assemblies where they are at that step. */
