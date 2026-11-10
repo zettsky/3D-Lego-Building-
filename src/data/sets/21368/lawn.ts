@@ -3,7 +3,9 @@
  * See docs/TRANSCRIBING.md for conventions. Coordinates: the manual's camera (+x lower right,
  * +z lower left, y up); `raw` positions in LDU with LDraw's −y up.
  */
+import type { FrameDef } from "@/engine/frames";
 import { kit, orient } from "../dsl";
+import { LEGO_21368 } from "./index"; // read lazily (attach step index)
 
 export const lw = kit("lw");
 const { raw, step } = lw;
@@ -57,7 +59,12 @@ step(92, 71, [
 
 // ── Second lawn wall (steps 93–96 so far): a 1×10 plate along x (cells x 0..200, cell 0 at −x),
 // towers at both ends with brackets whose faces cover the end faces (−x / +x).
-lw.frame({ id: "lw-wall2", label: "Lawn wall (second)", position: [0, 0, 16], rotation: [0, 0, 0] });
+// Step 104 lays it against wall 1's +z end: its 1×10 plate's underside on the ten bracket studs
+// that run up that end face (z 204), its length up wall 1's height, its studded face (+z) on
+// wall 1's studded side (+x). wall2 LDU (x, y, z) → wall1 (z, −x, 204 − y).
+const wall2: FrameDef = { id: "lw-wall2", label: "Lawn wall (second)", parent: "lw-wall1", position: [0, 0, 10.2], rotation: [Math.PI / 2, Math.PI / 2, 0], staging: { position: [0, 0, 16], rotation: [0, 0, 0] } };
+Object.defineProperty(wall2, "attachStep", { enumerable: true, get: () => LEGO_21368.steps.findIndex((st) => (st.manualStep ?? 0) >= 104) });
+lw.frame(wall2);
 lw.use("lw-wall2");
 const cx = (c: number) => 10 + 20 * c;
 const FACE_MX = orient([0, 0, -1], UPV); // bracket face (part −z) → −x
@@ -93,3 +100,7 @@ step(102, 77, [
 ]);
 // 103 · tiles: 1×2 on cells 0–1, 1×8 on cells 2–9.
 step(103, 77, [raw("3069b", G, [20, -160, 10]), raw("4162", G, [120, -160, 10])]);
+
+// 104 · wall 2 pressed onto wall 1's end (see the lw-wall2 frame); shown lying down.
+lw.use("lw-wall1");
+step(104, 78, [], "Lay both walls down and press the second wall's plate onto the first wall's end studs.");
