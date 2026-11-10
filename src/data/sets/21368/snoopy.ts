@@ -5,7 +5,7 @@
  * toward the lower left, y up. Sub-builds use their own frames, posed as the manual builds
  * them, and are moved into place on the step that attaches them.
  */
-import { BACK, FRONT, LEFT, RIGHT, UP, kit, yaw } from "../dsl";
+import { BACK, FRONT, LEFT, RIGHT, UP, kit, orient, yaw } from "../dsl";
 
 export const sn = kit("sn");
 const { put, raw, step, join } = sn;
@@ -38,5 +38,30 @@ const cF = put("79389", W, [2, 0, 1], yaw(2));
 const bB = raw("44728", W, [20, -40, 10]);
 const cB = raw("79389", W, [50, -40, 10]);
 step(3, 13, [bF, cF, bB, cB]);
+
+// 4–7 · onto the axle (centre line y −22, z 20 LDU), from the block face at x 60 outward.
+// Orientations: part "up" (−LDraw y) or part z along the axle (+x).
+const ALONG_UP = orient([0, 0, 1], [1, 0, 0], [0, 1, 0]); // part up → +x, part z → scene up
+const conn = raw("18654", W, [70, -22, 20], ALONG_UP); // round 1L connector, x 60–80
+join(axle, conn, "axle");
+step(4, 13, [conn]);
+
+// Life ring around the connector, against the block, its stud facing out (+x) at the top;
+// its centre sits 19 LDU from the stud (outer radius 24, bounds z −43..5).
+const ring = raw("30340", "black", [68, -41, 20], ALONG_UP);
+// Driving ring extension, clutch teeth toward the free end: part z → −x, x 80–108.
+const drive = raw("35186", W, [90, -22, 20], orient([0, 0, 1], [0, 1, 0], [-1, 0, 0]));
+join(ring, conn, "rest");
+join(axle, drive, "axle");
+step(5, 14, [ring, drive]);
+
+const bush = raw("32123b", W, [113, -22, 20], orient([0, 0, -1], [0, 1, 0], [1, 0, 0])); // x 108–118
+join(axle, bush, "axle");
+step(6, 14, [bush]);
+
+// Ball joint: flat end with the blind axle hole against the bush, ball pointing +x.
+const ball = raw("32474", W, [127.25, -22, 20], ALONG_UP);
+join(axle, ball, "axle");
+step(7, 15, [ball]);
 
 export { BACK, FRONT, LEFT, RIGHT };
