@@ -122,4 +122,8 @@ for (const [k, s, zc] of [[1, 1, 78], [-1, -1, -38]] as const) {
 }
 step(11, 17, legs);
 
+// 12 · no new parts: the torso is turned upright (ball joint up). Its final pose is set on the
+// step that joins it to the hip sub-build built in steps 13–19.
+step(12, 17, [], "Turn the body upright: ball joint on top.");
+
 export { BACK, FRONT, LEFT, RIGHT };
