@@ -104,3 +104,21 @@ step(103, 77, [raw("3069b", G, [20, -160, 10]), raw("4162", G, [120, -160, 10])]
 // 104 · wall 2 pressed onto wall 1's end (see the lw-wall2 frame); shown lying down.
 lw.use("lw-wall1");
 step(104, 78, [], "Lay both walls down and press the second wall's plate onto the first wall's end studs.");
+
+// ── Third lawn wall (steps 105–109 so far): bricks along z, cell k 0 at the +z end (lower left).
+lw.frame({ id: "lw-wall3", label: "Lawn wall (third)", position: [0, 0, -16], rotation: [0, 0, 0] });
+lw.use("lw-wall3");
+const kz = (k: number) => 190 - 20 * k; // centre of cell k
+const kMid = (k0: number, k1: number) => (kz(k0) + kz(k1)) / 2;
+// 105 · 1×6 brick (cells 4–9), 1×4 brick on its right end (cells 6–9).
+step(105, 79, [raw("3009", G, [10, -24, kMid(4, 9)], ALONG_Z), raw("3010", G, [10, -48, kMid(6, 9)], ALONG_Z)]);
+// 106 · 1×6 brick on the second course, cells 0–5 (overhanging the first course's left end).
+step(106, 79, [raw("3009", G, [10, -48, kMid(0, 5)], ALONG_Z)]);
+// 107 · under it: side-stud brick at cell 0 (stud facing +x), 1×3 brick at cells 1–3.
+step(107, 80, [raw("87087", G, [10, -24, kz(0)], SIDE_PX), raw("3622", G, [10, -24, kMid(1, 3)], ALONG_Z)]);
+// 108 · third course: 1×3 (cells 1–3), 1×6 (cells 4–9).
+step(108, 80, [raw("3622", G, [10, -72, kMid(1, 3)], ALONG_Z), raw("3009", G, [10, -72, kMid(4, 9)], ALONG_Z)]);
+// 109 · two 1×1 plates stacked on cell 0.
+step(109, 81, [raw("3024", G, [10, -56, kz(0)]), raw("3024", G, [10, -64, kz(0)])]);
+// TODO 110–127: step 110's curved 1×2 brick (5841) sits at the left end over cell 0 (top −64) and
+// cell 1 (top −72), one plate apart; its seating is not yet resolved.
