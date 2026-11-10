@@ -64,4 +64,15 @@ const ball = raw("32474", W, [127.25, -22, 20], ALONG_UP);
 join(axle, ball, "axle");
 step(7, 15, [ball]);
 
+// 8 · 2× (1×1 plate under the thick end of a curved 2×1 slope) on the lower row of each long
+// side: the slope spans x 0–2 with its thick, square end toward the ring (+x), so the plate
+// takes the second lower stud and the thin end clears the first. 11477's thick end is its −z
+// end (checked in the viewer) and its underside is at its origin. Face studs start at z 44 (front) and z −4 (back);
+// lower row centre y −10. The back pair mirrors the front one (180° about x).
+const pF = raw("3024", W, [30, -10, 52], orient([1, 0, 0], [0, 0, 1], [0, -1, 0]));
+const sF = raw("11477", W, [20, -10, 52], orient([0, -1, 0], [0, 0, 1], [-1, 0, 0]));
+const pB = raw("3024", W, [30, -10, -12], orient([1, 0, 0], [0, 0, -1], [0, 1, 0]));
+const sB = raw("11477", W, [20, -10, -12], orient([0, 1, 0], [0, 0, -1], [-1, 0, 0]));
+step(8, 15, [pF, sF, pB, sB]);
+
 export { BACK, FRONT, LEFT, RIGHT };
