@@ -225,4 +225,54 @@ foot(20, 10, -1);
 sn.use("torso");
 step(21, 22, [], "Put the legs under the body: the waist clip grips the core brick's lower bar.");
 
+// ── Bag 1 · back and tail (steps 22–26), its own frame; step 27 puts it on the back ──
+// Built studs up: red 2×3 along z (x 0..40, z −20..40), its back row (z −20..0) under the dome.
+// Step 27: red plate on the torso's six back studs, dome toward the neck, tail end toward the
+// legs (the six studs are the step-3 brackets', at y −40). back LDU (x, y, z) → torso (40 − z, y − 48, x).
+const backFrame: FrameDef = { id: "sn-back", label: "Snoopy's back", parent: "torso", position: [2, 2.4, 0], rotation: [0, -Math.PI / 2, 0], staging: { position: [0, 0, -6], rotation: [0, 0, 0] } };
+Object.defineProperty(backFrame, "attachStep", { enumerable: true, get: () => LEGO_21368.steps.findIndex((st) => (st.manualStep ?? 0) >= 27) });
+sn.frame(backFrame);
+sn.use("sn-back");
+const bkRed = raw("3021", "red", [20, 0, 10], ALONG_Z);
+const bkGray = raw("3023", "light-bluish-gray", [20, -8, -10]);
+step(22, 23, [bkRed, bkGray]);
+// 23 · 2× (quarter-circle 2×2 curved brick on a rounded-corner plate): a half dome over the back
+// row, the gray plate held in the two plates' cut-outs, the quarter circles rounding outward-back.
+// 79491: rounded cell at its origin, cut-out at part (+20, +20). 5852: quarter circle about its
+// part (−20, +20) corner, 1×1 bottom cut-out in that corner cell.
+const s23: ReturnType<typeof raw>[] = [];
+for (const [ox, toward] of [[-10, -1], [50, 1]] as const) {
+  // toward: −1 = left unit (rounded corner at x −10, cut-out at x 10), +1 = right unit
+  const cutDir: V3 = [-toward, 0, 0];
+  const plate = raw("79491", W, [ox, -8, -30], either(UPV, [cutDir, [0, 0, 1]], [[0, 0, 1], cutDir]));
+  const centre: V3 = [-toward, 0, 0]; // from the part's centre toward the half dome's middle-front
+  const dome = raw("5852", W, [ox - 10 * toward, -8, -20], either(UPV, [neg(centre), [0, 0, 1]], [[0, 0, -1], centre]));
+  s23.push(plate, dome);
+}
+step(23, 23, s23);
+
+// 24 · four curved bricks round the plate's front 2×2: their recessed stud cells on its studs,
+// the curved cells outward (1×2 curved bricks on the middle row, 2×2 corners at the front), the
+// last 1×2 pressed onto the remaining red stud (back left).
+const s24 = [
+  raw("5846", W, [10, -24, 30], orient([0, 0, -1], UPV)), // front left, rounded corner at x −10, z 50
+  raw("5846", W, [30, -24, 30], orient([-1, 0, 0], UPV)), // front right
+  raw("5841", W, [30, -24, 10], orient([0, 0, 1], UPV)), // curved cell at x 50
+  raw("5841", W, [10, -24, 10], orient([0, 0, -1], UPV)), // curved cell at x −10
+];
+step(24, 24, s24);
+// 25 · in the window of recessed studs: 1×2 plate on the front pair, black rounded 1×2 tile behind.
+const bkPlate = raw("3023", W, [20, -24, 30]);
+step(25, 24, [bkPlate, raw("1126", "black", [20, -24, 10])]);
+// 26 · tail: black round 1×1 plate with open stud on a half-round 1×2 jumper, horn in the open
+// stud curving toward the dome; the jumper on the 1×2 plate, round side to the front.
+const tailBase = raw("1745", W, [20, -32, 30], orient([-1, 0, 0], UPV));
+const tailRound = raw("85861", "black", [20, -40, 30]);
+const tail = raw("53451", W, [20, -44, 30], orient([1, 0, 0], [0, 0, -1], [0, 1, 0]));
+join(tail, tailRound, "bar");
+step(26, 24, [tailBase, tailRound, tail]);
+// 27 · turned over and pressed onto the back (see the sn-back frame).
+sn.use("torso");
+step(27, 25, [], "Press the back onto the body's back studs, tail toward the legs.");
+
 export { BACK, FRONT, LEFT, RIGHT };

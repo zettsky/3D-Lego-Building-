@@ -156,8 +156,10 @@ export function posedStuds(id: string, p: LdPose): { pos: THREE.Vector3; dir: TH
 /**
  * Stud holders the footprint rule cannot find, from the parts' LDraw geometry:
  * 4585 (bracket 2×1–2×1 up centred): behind each face stud, and under both cells of its plate.
+ * 79491 (plate 2×2 corner round): under its three cells, none under the 1×1 cut-out.
  */
 const EXTRA_SOCKETS: Record<string, number[][]> = {
+  "79491": [[0, 8, 0, 0, 1, 0], [20, 8, 0, 0, 1, 0], [0, 8, 20, 0, 1, 0]],
   "4585": [[0, -30, 4, 0, 0, 1], [0, -10, 4, 0, 0, 1], [0, 8, -10, 0, 1, 0], [0, 8, 10, 0, 1, 0]],
 };
 
