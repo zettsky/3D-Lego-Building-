@@ -5,7 +5,9 @@
  * toward the lower left, y up. Sub-builds use their own frames, posed as the manual builds
  * them, and are moved into place on the step that attaches them.
  */
+import type { FrameDef } from "@/engine/frames";
 import { BACK, FRONT, LEFT, RIGHT, UP, kit, orient, yaw } from "../dsl";
+import { LEGO_21368 } from "./index"; // read lazily (attach step index), after both modules load
 
 export const sn = kit("sn");
 const { put, raw, step, join } = sn;
@@ -14,7 +16,11 @@ const W = "white";
 const DG = "dark-bluish-gray";
 
 // ── Bag 1 · torso, built lying on its back (steps 1–12) ─────────────────────
-sn.frame({ id: "torso", label: "Snoopy's body", position: [0, 0, 0], rotation: [0, 0, 0] });
+// Built lying on its back (steps 1–11); from step 12 it stands: torso +x up, its back (studs, +y)
+// toward −x, feet on the ground (soles at torso x −80).
+const torsoFrame: FrameDef = { id: "torso", label: "Snoopy's body", position: [0, 4, 0], rotation: [0, 0, Math.PI / 2], staging: { position: [0, 0, 0], rotation: [0, 0, 0] } };
+Object.defineProperty(torsoFrame, "attachStep", { enumerable: true, get: () => LEGO_21368.steps.findIndex((st) => (st.manualStep ?? 0) >= 12) });
+sn.frame(torsoFrame);
 sn.use("torso");
 const plate = put("3021", W, [0, 0, 0]);
 const core = put("77808", DG, [0, 1, 0], yaw(1));
@@ -129,7 +135,12 @@ step(12, 17, [], "Turn the body upright: ball joint on top.");
 // ── Bag 1 · lower body and feet (steps 13–20), its own frame ────────────────
 // Frame axes as the manual draws it from step 15 on: long side along z (x 0..40, z 0..80 LDU),
 // the red plate's side facing +x. Levels: base 2×4 top at y 0, parts under it at y 8..16.
-sn.frame({ id: "sn-hip", label: "Snoopy's lower body", position: [0, 0, 8], rotation: [0, 0, 0] });
+// Step 21 hangs it under the torso (turned 180° about x): its back (the red plate's underside)
+// flush with the torso's back, the waist clip round the core brick's lower bar (torso x 2, y −12,
+// z 10), the overhanging 2×4 against the torso's lower edge. hip LDU (x, y, z) → torso (x − 48, −y − 16, 60 − z).
+const hipFrame: FrameDef = { id: "sn-hip", label: "Snoopy's lower body", parent: "torso", position: [-2.4, 0.8, 3], rotation: [Math.PI, 0, 0], staging: { position: [0, 0, 6], rotation: [0, 0, 0] } };
+Object.defineProperty(hipFrame, "attachStep", { enumerable: true, get: () => LEGO_21368.steps.findIndex((st) => (st.manualStep ?? 0) >= 21) });
+sn.frame(hipFrame);
 sn.use("sn-hip");
 type V3 = [number, number, number];
 const cross = (a: V3, b: V3): V3 => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
@@ -209,5 +220,9 @@ function foot(n: number, zc: number, s: 1 | -1) {
 }
 foot(19, 70, 1);
 foot(20, 10, -1);
+
+// 21 · no new parts: the legs go under the body (see the sn-hip frame).
+sn.use("torso");
+step(21, 22, [], "Put the legs under the body: the waist clip grips the core brick's lower bar.");
 
 export { BACK, FRONT, LEFT, RIGHT };
