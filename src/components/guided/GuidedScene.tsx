@@ -10,8 +10,9 @@ import { memo, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { Line } from "@react-three/drei";
-import { boundsCenter, brickTransform, sceneBounds, type BrickInstance } from "@/engine/assembly";
-import { assemblyAt, allBricks, type Instruction } from "@/engine/instructions";
+import { boundsCenter, brickTransform, type BrickInstance } from "@/engine/assembly";
+import { assemblyAt, fullBounds, type Instruction } from "@/engine/instructions";
+import { FrameRig, InFrame, InstancedBricks, byFrame } from "@/engine/render/Frames";
 import { explodeVectors } from "@/engine/explode";
 import { ghostVisible, type GuidedState } from "@/engine/guidedMachine";
 import { Brick } from "@/engine/render/Brick";
@@ -26,14 +27,16 @@ const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 const clamp01 = (t: number) => Math.max(0, Math.min(1, t));
 
 const StaticBricks = memo(function StaticBricks({ bricks }: { bricks: BrickInstance[] }) {
-  return (
-    <>
-      {bricks.map((b) => (
-        <Brick key={b.uid} brick={b} interactive={false} />
-      ))}
-    </>
-  );
+  return <InstancedBricks bricks={bricks} />;
 });
+
+/** Explode vectors are computed on each sub-assembly's own grid. */
+function explodeByFrame(previous: BrickInstance[], bricks: BrickInstance[]) {
+  const out = new Map<string, [number, number, number]>();
+  const prev = new Map(byFrame(previous));
+  for (const [frame, list] of byFrame(bricks)) for (const [k, v] of explodeVectors(prev.get(frame) ?? [], list)) out.set(k, v);
+  return out;
+}
 
 function StepBricks({
   previous,
@@ -49,7 +52,7 @@ function StepBricks({
   reduced: boolean;
 }) {
   const refs = useRef(new Map<string, THREE.Group>());
-  const vectors = useMemo(() => explodeVectors(previous, bricks), [previous, bricks]);
+  const vectors = useMemo(() => explodeByFrame(previous, bricks), [previous, bricks]);
   const order = useMemo(() => [...bricks].sort((a, b) => a.y - b.y || a.z - b.z || a.x - b.x), [bricks]);
   const bases = useMemo(() => new Map(bricks.map((b) => [b.uid, brickTransform(b).position])), [bricks]);
   const anim = useRef<{ token: number; start: number | null; reported: boolean }>({ token: -1, start: null, reported: false });
@@ -106,27 +109,30 @@ function StepBricks({
         const top = getPart(b.partId).h * PLATE;
         const from: [number, number, number] = [base[0], base[1] + top, base[2]];
         const to: [number, number, number] = [base[0] + v[0] * state.explodeAmount, base[1] + v[1] * state.explodeAmount, base[2] + v[2] * state.explodeAmount];
-        return { uid: b.uid, from, to };
+        return { uid: b.uid, from, to, frame: b.frame };
       })
     : [];
 
   return (
     <>
       {bricks.map((b) => (
-        <Brick
-          key={b.uid}
-          brick={b}
-          interactive={false}
-          outline={state.exploded ? "#C96B55" : null}
-          ref={(g) => {
-            if (g) refs.current.set(b.uid, g);
-            else refs.current.delete(b.uid);
-          }}
-        />
+        <InFrame key={b.uid} id={b.frame}>
+          <Brick
+            brick={b}
+            interactive={false}
+            outline={state.exploded ? "#C96B55" : null}
+            ref={(g) => {
+              if (g) refs.current.set(b.uid, g);
+              else refs.current.delete(b.uid);
+            }}
+          />
+        </InFrame>
       ))}
       {guides.map((g) =>
         Math.hypot(g.to[0] - g.from[0], g.to[1] - g.from[1], g.to[2] - g.from[2]) > 0.3 ? (
-          <Line key={g.uid} points={[g.from, g.to]} color="#8A7666" lineWidth={1} dashed dashSize={0.12} gapSize={0.1} transparent opacity={0.7} />
+          <InFrame key={g.uid} id={g.frame}>
+            <Line points={[g.from, g.to]} color="#8A7666" lineWidth={1} dashed dashSize={0.12} gapSize={0.1} transparent opacity={0.7} />
+          </InFrame>
         ) : null,
       )}
     </>
@@ -152,8 +158,8 @@ function GhostBricks({ bricks, visible }: { bricks: BrickInstance[]; visible: bo
   return (
     <group ref={group}>
       {bricks.map((b) => (
+        <InFrame key={b.uid} id={b.frame}>
         <Brick
-          key={b.uid}
           brick={b}
           material={hovered === b.uid ? hot : mat}
           outline={visible ? (hovered === b.uid ? "#A9523E" : "#77875F") : null}
@@ -165,6 +171,7 @@ function GhostBricks({ bricks, visible }: { bricks: BrickInstance[]; visible: bo
           }}
           onPointerOut={() => setHovered((h) => (h === b.uid ? null : h))}
         />
+        </InFrame>
       ))}
     </group>
   );
@@ -179,7 +186,7 @@ export interface GuidedSceneProps {
 
 export default function GuidedScene({ instruction, state, onAnimDone, wsRef }: GuidedSceneProps) {
   const reduced = useMemo(() => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches, []);
-  const full = useMemo(() => sceneBounds(allBricks(instruction)), [instruction]);
+  const full = useMemo(() => fullBounds(instruction), [instruction]);
   const center = useMemo(() => boundsCenter(full), [full]);
   const previous = useMemo(() => assemblyAt(instruction, state.step - 1), [instruction, state.step]);
   const current = instruction.steps[state.step]?.bricks ?? [];
@@ -187,9 +194,11 @@ export default function GuidedScene({ instruction, state, onAnimDone, wsRef }: G
 
   return (
     <Workspace ref={wsRef} center={center} frame={full}>
-      <StaticBricks bricks={previous} />
-      <StepBricks previous={previous} bricks={current} state={state} onAnimDone={onAnimDone} reduced={reduced} />
-      <GhostBricks bricks={next} visible={ghostVisible(state)} />
+      <FrameRig frames={instruction.frames} step={state.step} instant={reduced}>
+        <StaticBricks bricks={previous} />
+        <StepBricks previous={previous} bricks={current} state={state} onAnimDone={onAnimDone} reduced={reduced} />
+        <GhostBricks bricks={next} visible={ghostVisible(state)} />
+      </FrameRig>
     </Workspace>
   );
 }

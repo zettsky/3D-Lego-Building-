@@ -3,7 +3,7 @@
  *
  * Three.js objects are *views* of this data, never the source of truth.
  */
-import { getPart, hasStudAt, type PartDef } from "./parts";
+import { getPart, hasStudAt, studPoints, type PartDef } from "./parts";
 import { PLATE, type Vec3 } from "./units";
 
 export type Rot = 0 | 1 | 2 | 3; // quarter turns about +Y
@@ -16,8 +16,16 @@ export interface BrickInstance {
   y: number;
   z: number;
   rot: Rot;
-  /** Optional sub-assembly id (reserved for Phase 2 sub-assemblies). */
-  group?: string;
+  /**
+   * Sub-assembly this brick belongs to (see frames.ts). Coordinates are on that
+   * sub-assembly's own grid. Omitted = the main model.
+   */
+  frame?: string;
+  /**
+   * Held by a sideways connection (a stud on the side of another brick, a clip or a hinge)
+   * rather than by the studs below. Counts as supported for validation.
+   */
+  anchor?: boolean;
 }
 
 export interface Cell {
@@ -75,19 +83,49 @@ export function topOf(b: BrickInstance): number {
 
 const key3 = (x: number, y: number, z: number) => `${x},${y},${z}`;
 
-/** Voxel occupancy: one voxel = 1 stud × 1 stud × 1 plate. Conservative for slopes. */
+/**
+ * Map a local point of a part (from its min corner, in studs) to world grid coordinates.
+ * Same rotation as the renderer (Three.js rotation.y = rot·90°).
+ */
+export function localToWorldPoint(part: PartDef, b: Pick<BrickInstance, "x" | "z" | "rot">, px: number, pz: number): { x: number; z: number } {
+  const { fw, fd } = footprint(part, b.rot);
+  const ox = px - part.w / 2;
+  const oz = pz - part.d / 2;
+  const c = COS[b.rot];
+  const s = SIN[b.rot];
+  return { x: b.x + fw / 2 + ox * c + oz * s, z: b.z + fd / 2 - ox * s + oz * c };
+}
+
+/**
+ * Half-stud cells covered by a brick (integer keys = 2 × stud coordinate). Bricks may sit on
+ * half-stud offsets (jumper plates), so occupancy and connections use a half-stud lattice.
+ */
+export function halfCellsOf(b: BrickInstance): Cell[] {
+  const part = getPart(b.partId);
+  const out: Cell[] = [];
+  for (let hx = 0; hx < part.w * 2; hx++)
+    for (let hz = 0; hz < part.d * 2; hz++) {
+      const p = localToWorldPoint(part, b, (hx + 0.5) / 2, (hz + 0.5) / 2);
+      out.push({ x: Math.floor(p.x * 2), z: Math.floor(p.z * 2) });
+    }
+  return out;
+}
+
+const pkey = (x: number, z: number) => `${Math.round(x * 2)},${Math.round(z * 2)}`;
+
+/** Voxel occupancy: one voxel = ½ stud × ½ stud × 1 plate. Conservative for slopes and arches. */
 export function buildOccupancy(bricks: BrickInstance[]): Map<string, string> {
   const occ = new Map<string, string>();
   for (const b of bricks) {
     const h = getPart(b.partId).h;
-    for (const c of cellsOf(b)) for (let y = b.y; y < b.y + h; y++) occ.set(key3(c.x, y, c.z), b.uid);
+    for (const c of halfCellsOf(b)) for (let y = b.y; y < b.y + h; y++) occ.set(key3(c.x, y, c.z), b.uid);
   }
   return occ;
 }
 
 export function collidesWith(b: BrickInstance, occ: Map<string, string>, ignoreUid?: string): string | null {
   const h = getPart(b.partId).h;
-  for (const c of cellsOf(b))
+  for (const c of halfCellsOf(b))
     for (let y = b.y; y < b.y + h; y++) {
       const hit = occ.get(key3(c.x, y, c.z));
       if (hit && hit !== b.uid && hit !== ignoreUid) return hit;
@@ -95,12 +133,29 @@ export function collidesWith(b: BrickInstance, occ: Map<string, string>, ignoreU
   return null;
 }
 
-/** Stud map: key (x, studBaseY, z) → uid of the brick that owns the stud. */
+/** World positions of the studs on top of a brick. */
+export function studWorldPoints(b: BrickInstance): { x: number; z: number }[] {
+  const part = getPart(b.partId);
+  return studPoints(part).map(([px, pz]) => localToWorldPoint(part, b, px, pz));
+}
+
+/** Where a brick can accept studs from below: the centre of every stud-sized cell. */
+function receptorPoints(b: BrickInstance): { x: number; z: number }[] {
+  const part = getPart(b.partId);
+  if (part.shape === "grass") return [localToWorldPoint(part, b, 0.5, 0.5)];
+  const out: { x: number; z: number }[] = [];
+  for (let lx = 0; lx < part.w; lx++) for (let lz = 0; lz < part.d; lz++) out.push(localToWorldPoint(part, b, lx + 0.5, lz + 0.5));
+  // Arches only touch down on their leg (local x = 0) and carry studs on top.
+  if (part.shape === "arch") return out.slice(0, part.d);
+  return out;
+}
+
+/** Stud map: key (2x, studBaseY, 2z) → uid of the brick that owns the stud. */
 export function buildStudMap(bricks: BrickInstance[]): Map<string, string> {
   const studs = new Map<string, string>();
   for (const b of bricks) {
     const top = topOf(b);
-    for (const c of studCellsOf(b)) studs.set(key3(c.x, top, c.z), b.uid);
+    for (const p of studWorldPoints(b)) studs.set(`${pkey(p.x, p.z)},${top}`, b.uid);
   }
   return studs;
 }
@@ -108,8 +163,8 @@ export function buildStudMap(bricks: BrickInstance[]): Map<string, string> {
 /** Bricks this brick clutches from above (it sits on their studs). */
 export function connectionsBelow(b: BrickInstance, studs: Map<string, string>): string[] {
   const out = new Set<string>();
-  for (const c of cellsOf(b)) {
-    const u = studs.get(key3(c.x, b.y, c.z));
+  for (const p of receptorPoints(b)) {
+    const u = studs.get(`${pkey(p.x, p.z)},${b.y}`);
     if (u && u !== b.uid) out.add(u);
   }
   return [...out];
@@ -121,7 +176,10 @@ export interface ConnectionGraph {
   grounded: Set<string>;
 }
 
-/** Ground = the build mat at y = 0 (studded baseplate in Custom Build, table in Guided Build). */
+/**
+ * Ground = the build mat at y = 0 (studded baseplate in Custom Build, table in Guided Build),
+ * or the base of a sub-assembly's own grid. `anchor` bricks are held sideways and count too.
+ */
 export function buildConnectionGraph(bricks: BrickInstance[]): ConnectionGraph {
   const studs = buildStudMap(bricks);
   const adj = new Map<string, Set<string>>();
@@ -132,7 +190,7 @@ export function buildConnectionGraph(bricks: BrickInstance[]): ConnectionGraph {
       adj.get(u)?.add(b.uid);
     }
   const grounded = new Set<string>();
-  const queue = bricks.filter((b) => b.y === 0).map((b) => b.uid);
+  const queue = bricks.filter((b) => b.y === 0 || b.anchor).map((b) => b.uid);
   for (const u of queue) grounded.add(u);
   while (queue.length) {
     const u = queue.shift()!;
@@ -171,11 +229,9 @@ export function validateAssembly(bricks: BrickInstance[], bounds?: Bounds2D): As
     const hit = collidesWith(b, occ);
     if (hit) issues.push({ kind: "collision", uid: b.uid, other: hit, message: `${b.uid} intersects ${hit}` });
     const h = getPart(b.partId).h;
-    for (const c of cellsOf(b)) {
-      if (bounds && (c.x < bounds.minX || c.z < bounds.minZ || c.x >= bounds.maxX || c.z >= bounds.maxZ))
-        issues.push({ kind: "out-of-bounds", uid: b.uid, message: `${b.uid} hangs off the build mat` });
-      for (let y = b.y; y < b.y + h; y++) occ.set(key3(c.x, y, c.z), b.uid);
-    }
+    if (bounds && cellsOf(b).some((c) => c.x < bounds.minX || c.z < bounds.minZ || c.x >= bounds.maxX || c.z >= bounds.maxZ))
+      issues.push({ kind: "out-of-bounds", uid: b.uid, message: `${b.uid} hangs off the build mat` });
+    for (const c of halfCellsOf(b)) for (let y = b.y; y < b.y + h; y++) occ.set(key3(c.x, y, c.z), b.uid);
   }
   const { grounded } = buildConnectionGraph(bricks);
   for (const b of bricks)

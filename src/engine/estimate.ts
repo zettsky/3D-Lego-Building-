@@ -19,7 +19,7 @@ export const PACE_LABEL: Record<Pace, string> = {
 const PACE_FACTOR: Record<Pace, number> = { relaxed: 1.4, standard: 1, experienced: 0.7 };
 
 /** Seconds to find + place one piece, by category (heuristic, not measured). */
-const SECONDS_PER_PIECE: Record<PartCategory, number> = { plate: 9, brick: 8, tile: 10, slope: 11 };
+const SECONDS_PER_PIECE: Record<PartCategory, number> = { plate: 9, brick: 8, tile: 10, slope: 11, panel: 9, arch: 11, round: 10, snot: 13, special: 12 };
 const SECONDS_PER_STEP = 10; // reading the step, finding the spot
 
 export interface TimeEstimate {

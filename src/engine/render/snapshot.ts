@@ -4,8 +4,9 @@
  * Avoids mounting dozens of WebGL canvases for inventory lists and set cards.
  */
 import * as THREE from "three";
-import { boundsCenter, boundsRadius, brickTransform, sceneBounds, type BrickInstance } from "../assembly";
-import { brickMaterial, partGeometry } from "./geometry";
+import { boundsCenter, boundsRadius, type BrickInstance } from "../assembly";
+import { placements, worldBounds, type FrameDef } from "../frames";
+import { brickMaterial, partGeometry, printOverlay } from "./geometry";
 
 let renderer: THREE.WebGLRenderer | null = null;
 let failed = false;
@@ -28,7 +29,7 @@ function getRenderer(): THREE.WebGLRenderer | null {
   }
 }
 
-export function snapshot(key: string, bricks: BrickInstance[], size = 160): string | null {
+export function snapshot(key: string, bricks: BrickInstance[], size = 160, frames: FrameDef[] = []): string | null {
   const k = `${key}@${size}`;
   const hit = cache.get(k);
   if (hit) return hit;
@@ -40,15 +41,24 @@ export function snapshot(key: string, bricks: BrickInstance[], size = 160): stri
   const sun = new THREE.DirectionalLight(0xffffff, 1.9);
   sun.position.set(4, 9, 6);
   scene.add(sun);
-  const bounds = sceneBounds(bricks);
+  const fm = new Map(frames.map((f) => [f.id, f]));
+  const bounds = worldBounds(bricks, fm);
   const c = boundsCenter(bounds);
   const radius = boundsRadius(bounds);
-  for (const b of bricks) {
-    const t = brickTransform(b);
-    const m = new THREE.Mesh(partGeometry(b.partId), brickMaterial(b.colorId));
-    m.position.set(t.position[0] - c[0], t.position[1] - c[1], t.position[2] - c[2]);
-    m.rotation.y = t.rotationY;
+  const shift = new THREE.Matrix4().makeTranslation(-c[0], -c[1], -c[2]);
+  for (const { brick, matrix } of placements(bricks, fm)) {
+    const world = shift.clone().multiply(matrix);
+    const m = new THREE.Mesh(partGeometry(brick.partId), brickMaterial(brick.colorId));
+    m.matrixAutoUpdate = false;
+    m.matrix.copy(world);
     scene.add(m);
+    const print = printOverlay(brick.partId);
+    if (print) {
+      const pm = new THREE.Mesh(print.geometry, print.material);
+      pm.matrixAutoUpdate = false;
+      pm.matrix.copy(world);
+      scene.add(pm);
+    }
   }
   const cam = new THREE.PerspectiveCamera(28, 1, 0.1, 500);
   const dir = new THREE.Vector3(1.15, 0.95, -1.5).normalize();

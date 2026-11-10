@@ -351,7 +351,7 @@ function ExportMenu({ disabled, onLdraw, onJson }: { disabled: boolean; onLdraw:
   );
 }
 
-const CATEGORY_ORDER: PartCategory[] = ["brick", "plate", "tile", "slope"];
+const CATEGORY_ORDER: PartCategory[] = ["brick", "plate", "tile", "slope", "panel", "arch", "round", "snot", "special"];
 
 function InventoryPanel({
   inventory, remaining, active, onPick, used, total, open, onClose,

@@ -1,20 +1,21 @@
 "use client";
 import { useEffect, useState } from "react";
 import type { BrickInstance } from "@/engine/assembly";
+import type { FrameDef } from "@/engine/frames";
 import { snapshot } from "@/engine/render/snapshot";
 
 /** Real 3D thumbnail rendered by the shared offscreen renderer. */
-export function Thumb({ id, bricks, size = 160, className = "", alt }: { id: string; bricks: BrickInstance[]; size?: number; className?: string; alt: string }) {
+export function Thumb({ id, bricks, size = 160, className = "", alt, frames }: { id: string; bricks: BrickInstance[]; size?: number; className?: string; alt: string; frames?: FrameDef[] }) {
   const [src, setSrc] = useState<string | null>(null);
   useEffect(() => {
     let alive = true;
     // Defer so many thumbnails don't block the first paint.
-    const t = window.setTimeout(() => alive && setSrc(snapshot(id, bricks, size)), 0);
+    const t = window.setTimeout(() => alive && setSrc(snapshot(id, bricks, size, frames)), 0);
     return () => {
       alive = false;
       window.clearTimeout(t);
     };
-  }, [id, bricks, size]);
+  }, [id, bricks, size, frames]);
   if (!src) return <div className={`animate-pulse rounded-lg bg-cream/60 ${className}`} aria-hidden="true" />;
   // eslint-disable-next-line @next/next/no-img-element
   return <img src={src} alt={alt} width={size} height={size} className={`object-contain ${className}`} draggable={false} />;

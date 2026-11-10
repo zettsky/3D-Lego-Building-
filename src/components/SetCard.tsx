@@ -13,7 +13,7 @@ export function setEstimate(s: SetEntry) {
 /** Cover: real 3D render for verified models; a drawn placeholder otherwise (no official images bundled). */
 export function SetCover({ set, size = 280, className = "" }: { set: SetEntry; size?: number; className?: string }) {
   if (set.instruction)
-    return <Thumb id={`set:${set.id}`} bricks={allBricks(set.instruction)} size={size} alt={`3D render of ${set.name}`} className={className} />;
+    return <Thumb id={`set:${set.id}`} bricks={allBricks(set.instruction)} frames={set.instruction.frames} size={size} alt={`3D render of ${set.name}`} className={className} />;
   return (
     <div className={`relative grid place-items-center overflow-hidden rounded-xl border border-dashed border-dust/50 bg-cream/40 ${className}`}>
       <svg viewBox="0 0 120 90" className="absolute inset-0 h-full w-full opacity-[0.18]" aria-hidden="true">
