@@ -275,4 +275,26 @@ step(26, 24, [tailBase, tailRound, tail]);
 sn.use("torso");
 step(27, 25, [], "Press the back onto the body's back studs, tail toward the legs.");
 
+// ── Bag 1 · belly (step 28), its own frame, pressed onto the hip's two front studs ──
+// Built studs up: yellow 2×3 along x (x 0..60, z 20..60), gray 1×2 across its middle column.
+// On Snoopy: belly x runs down the body (x 50 row on the hip 2×2's studs), studs inward.
+// belly LDU (x, y, z) → torso (32 − x, −y + 24, z − 20).
+const bellyFrame: FrameDef = { id: "sn-belly", label: "Snoopy's belly", parent: "torso", position: [1.6, -1.2, -1], rotation: [0, 0, Math.PI], staging: { position: [0, 0, 6], rotation: [0, 0, 0] } };
+Object.defineProperty(bellyFrame, "attachStep", { enumerable: true, get: () => LEGO_21368.steps.findIndex((st) => (st.manualStep ?? 0) >= 28) });
+sn.frame(bellyFrame);
+sn.use("sn-belly");
+const ALONG_Zb = orient([0, 0, 1], UPV);
+const s28 = [
+  raw("3021", "yellow", [30, 0, 40]),
+  raw("3023", "light-bluish-gray", [30, -8, 40], ALONG_Zb),
+  // curved 3×2 wedges, long side down the belly (x −20..40), cut-outs over the gray plate
+  raw("80177", W, [10, -24, 20], orient([0, 0, -1], UPV)),
+  raw("80178", W, [10, -24, 60], orient([0, 0, -1], UPV)),
+  raw("5841", W, [50, -24, 30], orient([0, 0, 1], UPV)),
+  raw("5841", W, [50, -24, 50], orient([0, 0, 1], UPV)),
+  raw("3023", W, [50, -24, 40], ALONG_Zb),
+];
+step(28, 26, s28);
+sn.use("torso");
+
 export { BACK, FRONT, LEFT, RIGHT };

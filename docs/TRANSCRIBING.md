@@ -49,8 +49,8 @@ Several sessions transcribe at the same time, in this same checkout, each owning
 
 | Section | File(s) | Kit / uid prefix |
 | --- | --- | --- |
-| Snoopy bag 1 (steps 3–27) | `src/data/sets/21368/snoopy.ts` | `sn` |
-| Snoopy head (28–78) | `snoopyHead.ts` | `sh` |
+| Snoopy bag 1 (steps 1–28) | `src/data/sets/21368/snoopy.ts` | `sn` |
+| Snoopy head (29–78) | `snoopyHead.ts` | `sh` |
 | Woodstock (W1–W11) | `woodstock.ts` (+ the 5648 head shape, see below) | `wd` |
 | Lawn + night sky (79–162) | `lawn.ts`, `sky.ts` | `lw`, `sk` |
 | Doghouse (163–225) | `doghouse.ts` | `dh` |
@@ -83,8 +83,8 @@ Rules:
 
 | Section | Manual steps | Pages | Status |
 | --- | --- | --- | --- |
-| Snoopy: torso, legs, belly (bag 1) | 1–27 | 11–26 | steps 1–12 transcribed and checked; 13–27 to do (13–19 build a second sub-assembly; the torso's upright pose is set when they join) |
-| Snoopy: head (bags 2–3) | 28–78 | 27–59 | steps 29–38 transcribed (side panel A partly); 39–78 to do |
+| Snoopy: torso, legs, back, belly (bag 1) | 1–28 | 11–26 | done: torso (1–12, stands upright from 12), lower body and feet (13–20, frame `sn-hip`, attached 21), back and tail (22–26, `sn-back`, attached 27), belly (28, `sn-belly`); joins checked overlap-free against the torso |
+| Snoopy: head (bags 2–3) | 29–78 | 27–59 | steps 29–38 transcribed (side panel A partly); 39–78 to do |
 | Woodstock | W1–W11 | 60–62 | done (roof attach pose TODO); 5648 head is the only hand-made part shape |
 | Lawn (bag 4) | 79–127 | 64–96 | not started |
 | Night sky (bag 5) | 128–162 | 97–116 | not started |
