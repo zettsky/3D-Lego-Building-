@@ -14,6 +14,8 @@ export interface InstructionStep {
   manualStep?: number;
   /** The manual page this step appears on. */
   page?: number;
+  /** Shown instead of the step number when the manual numbers a sub-build separately (e.g. "Woodstock 3"). */
+  label?: string;
 }
 
 export interface Instruction {

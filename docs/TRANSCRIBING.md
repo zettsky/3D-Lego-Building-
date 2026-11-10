@@ -43,6 +43,42 @@ Each sub-build uses the manual's own camera for that sub-build:
    - within each sub-build all parts are connected through studs (taken from the LDraw
      geometry) or through declared joins (axles, pins, clips, ball joints, hinges).
 
+## Working in parallel
+
+Several sessions transcribe at the same time, in this same checkout, each owning its files:
+
+| Section | File(s) | Kit / uid prefix |
+| --- | --- | --- |
+| Snoopy bag 1 (steps 3–27) | `src/data/sets/21368/snoopy.ts` | `sn` |
+| Snoopy head (28–78) | `snoopyHead.ts` | `sh` |
+| Woodstock (W1–W11) | `woodstock.ts` (+ the 5648 head shape, see below) | `wd` |
+| Lawn + night sky (79–162) | `lawn.ts`, `sky.ts` | `lw`, `sk` |
+| Doghouse (163–225) | `doghouse.ts` | `dh` |
+| Displays (226–254, campfire 226–244) | `displays.ts` | `tw`, `cf` |
+
+Rules:
+
+- Edit only your own files. If something shared needs changing (engine, dsl.ts, index.ts,
+  tests, pack tool, catalog), describe it in your final report instead of editing it.
+- Frame ids must start with your prefix (e.g. `sh-head`, `dh-roof-left`) so they never clash.
+- Committing: `git add <your files only>`, then
+  `git commit -m "21368 <section>: steps A–B" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"`,
+  then `git push origin main`. Never `git add -A`. If git reports `index.lock`, wait a moment
+  and retry. Commit after every few steps.
+- `npm test` must stay green before each commit. The parts-list test is shared: if it fails on
+  a part you did not use, another session has over-used it; report it rather than "fixing" it.
+- The dev server already runs on http://localhost:3005; do not start another. The step viewer:
+  `/dev/step/21368?s=<step>` (campfire display: `/dev/step/21368-campfire?s=<step>`), with
+  `&only=<frame id>` to show one sub-build.
+- Sections that attach to another section (head onto Snoopy's ball joint, Snoopy and Woodstock
+  onto the roof, the house onto the lawn) place their own frames relative to the main model.
+  Read the other section's file for the anchor part when it exists; otherwise leave the final
+  attach pose as a clearly marked TODO with the step number, and say so in your report.
+- Woodstock's head, part 5648 "Helmet Dome, No Stud", has no 3D model in the LDraw library or
+  on the unofficial tracker. Its *placement* is exact like any other part; its *shape* must be
+  built: write an LDraw-format part file in `tools/ldraw-custom/parts/5648.dat` (committed; the pack tool searches it) from the part's real
+  dimensions, pack it, and mark it in the report as the only hand-made part shape.
+
 ## Status
 
 | Section | Manual steps | Pages | Status |

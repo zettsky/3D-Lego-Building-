@@ -19,6 +19,8 @@ import path from "node:path";
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1")), "..");
 const LIB = path.join(ROOT, ".ldraw", "ldraw");
 const SEARCH = ["parts", "parts/s", "p"].map((d) => path.join(LIB, d));
+const CUSTOM = path.join(ROOT, "tools", "ldraw-custom");
+if (fs.existsSync(CUSTOM)) SEARCH.push(path.join(CUSTOM, "parts"), path.join(CUSTOM, "parts", "s"));
 const UNOFFICIAL = path.join(ROOT, ".ldraw", "unofficial");
 if (fs.existsSync(UNOFFICIAL)) SEARCH.push(path.join(UNOFFICIAL, "parts"), path.join(UNOFFICIAL, "parts", "s"), path.join(UNOFFICIAL, "p"));
 
@@ -178,6 +180,7 @@ const ALIAS = {
   "69729pr0080": "69729", // SNOOPY tile: print drawn by the site
   "87079pr0153": "87079", // typewriter paper: print drawn by the site
   "76796pr0003": "76796", // windscreen with black ovals: print drawn by the site
+  "5648pr0001": "5648", // Woodstock head: shape hand-made in tools/ldraw-custom (not in LDraw)
 };
 
 // ── run ────────────────────────────────────────────────────────────────────

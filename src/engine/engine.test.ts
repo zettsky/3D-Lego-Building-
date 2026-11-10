@@ -309,7 +309,7 @@ describe("Snoopy's Doghouse (21368, steps 79–225)", () => {
 });
 
 // ── Phase 3: LDraw geometry and the 21368 transcription ─────────────────────
-import { LEGO_21368 } from "@/data/sets/21368";
+import { LEGO_21368 as TYPEWRITER_21368, LEGO_21368_CAMPFIRE } from "@/data/sets/21368";
 import { BOM_21368, BOM_TOOLS } from "@/data/sets/21368/bom";
 import { validatePosed } from "./connect";
 import { ldFootprint, ldPartDef } from "./ldraw/library";
@@ -325,7 +325,7 @@ describe("LDraw part library", () => {
   });
 });
 
-describe("21368 transcription", () => {
+for (const LEGO_21368 of [TYPEWRITER_21368, LEGO_21368_CAMPFIRE]) describe(`21368 transcription (${LEGO_21368.id})`, () => {
   const bom = new Map<string, number>();
   for (const l of BOM_21368) if (!BOM_TOOLS.has(l.element)) bom.set(`${l.part}|${l.color}`, (bom.get(`${l.part}|${l.color}`) ?? 0) + l.qty);
   const used = new Map<string, number>();
