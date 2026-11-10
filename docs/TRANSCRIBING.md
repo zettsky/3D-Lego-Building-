@@ -83,7 +83,7 @@ Rules:
 
 | Section | Manual steps | Pages | Status |
 | --- | --- | --- | --- |
-| Snoopy: torso, legs, belly (bag 1) | 1–27 | 11–26 | steps 1–8 transcribed and checked; 9–27 to do |
+| Snoopy: torso, legs, belly (bag 1) | 1–27 | 11–26 | steps 1–10 transcribed and checked; 11–27 to do (11: leg sub-builds hinge on the step-9 clips; 24201 has a stepped top the socket model does not cover yet) |
 | Snoopy: head (bags 2–3) | 28–78 | 27–59 | steps 29–38 transcribed (side panel A partly); 39–78 to do |
 | Woodstock | W1–W11 | 60–62 | done (roof attach pose TODO); 5648 head is the only hand-made part shape |
 | Lawn (bag 4) | 79–127 | 64–96 | not started |
