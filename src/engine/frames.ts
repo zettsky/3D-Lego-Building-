@@ -18,6 +18,7 @@
 import * as THREE from "three";
 import { brickTransform, footprint, type Box3, type BrickInstance } from "./assembly";
 import { getPart } from "./parts";
+import { posedBox } from "./ldraw/library";
 import { PLATE, type Vec3 } from "./units";
 
 export interface FrameTransform {
@@ -69,6 +70,16 @@ export function frameWorldMatrix(frames: Map<string, FrameDef>, id: string | und
 
 /** World-space corners of a brick's bounding box. */
 function brickCorners(b: BrickInstance): THREE.Vector3[] {
+  if (b.pose) {
+    // LDraw-posed part: corners of its oriented body box, LDraw space (LDU, −y up) → scene units.
+    const { c, axes, half } = posedBox(b.partId, b.pose, 0);
+    const out: THREE.Vector3[] = [];
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) for (const sz of [-1, 1]) {
+      const p = c.clone().addScaledVector(axes[0], sx * half[0]).addScaledVector(axes[1], sy * half[1]).addScaledVector(axes[2], sz * half[2]);
+      out.push(new THREE.Vector3(p.x / 20, -p.y / 20, p.z / 20));
+    }
+    return out;
+  }
   const part = getPart(b.partId);
   const { fw, fd } = footprint(part, b.rot);
   const y0 = b.y * PLATE;

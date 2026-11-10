@@ -154,6 +154,14 @@ export function posedStuds(id: string, p: LdPose): { pos: THREE.Vector3; dir: TH
 }
 
 /**
+ * Stud holders the footprint rule cannot find, from the parts' LDraw geometry:
+ * 4585 (bracket 2×1–2×1 up centred): behind each face stud, and under both cells of its plate.
+ */
+const EXTRA_SOCKETS: Record<string, number[][]> = {
+  "4585": [[0, -30, 4, 0, 0, 1], [0, -10, 4, 0, 0, 1], [0, 8, -10, 0, 1, 0], [0, 8, 10, 0, 1, 0]],
+};
+
+/**
  * Where a posed part accepts studs: the centre of every stud cell on its underside, facing
  * down (LDraw +Y) in part space. Parts whose underside cannot take a stud simply never match.
  */
@@ -161,19 +169,24 @@ export function posedSockets(id: string, p: LdPose): { pos: THREE.Vector3; dir: 
   const f = ldFootprint(id);
   const [x, y, z, a, b, c, d, e, ff, g, h, i] = p;
   const out: { pos: THREE.Vector3; dir: THREE.Vector3 }[] = [];
-  // "Down" brackets: the sockets are under the top plate (z −10..10, 8 LDU below its top),
-  // not at the bottom of the hanging face.
-  const down = /^Bracket.*Down/.test(ldMeta(id)?.name ?? "");
-  const zs: number[] = down ? [0] : [];
-  if (!down) for (let sz = f.z0 + 10; sz < f.z1; sz += 20) zs.push(sz);
-  for (let sx = f.x0 + 10; sx < f.x1; sx += 20)
-    for (const sz of zs) {
-      const sy = down ? f.top + 8 : f.bottom;
-      out.push({
-        pos: new THREE.Vector3(a * sx + b * sy + c * sz + x, d * sx + e * sy + ff * sz + y, g * sx + h * sy + i * sz + z),
-        dir: new THREE.Vector3(b, e, h).normalize(),
-      });
-    }
+  // Parts whose stud holders are not on the footprint grid: [x, y, z, dx, dy, dz] in part space.
+  const extra = EXTRA_SOCKETS[id];
+  const local: number[][] = extra ? [...extra] : [];
+  if (!extra) {
+    // Brackets: the face widens the footprint, so the sockets sit under the top studs instead of
+    // on the footprint grid ("Down" brackets: under the top plate, 8 LDU below its top, not at the
+    // bottom of the hanging face).
+    const meta = ldMeta(id);
+    const name = meta?.name ?? "";
+    const sy = /^Bracket.*Down/.test(name) ? f.top + 8 : f.bottom;
+    if (/^Bracket/.test(name) && meta) for (const st of meta.studs) { if (st[4] < -0.9) local.push([st[0], sy, st[2], 0, 1, 0]); }
+    else for (let sx = f.x0 + 10; sx < f.x1; sx += 20) for (let sz = f.z0 + 10; sz < f.z1; sz += 20) local.push([sx, sy, sz, 0, 1, 0]);
+  }
+  for (const [sx, sy, sz, dx, dy, dz] of local)
+    out.push({
+      pos: new THREE.Vector3(a * sx + b * sy + c * sz + x, d * sx + e * sy + ff * sz + y, g * sx + h * sy + i * sz + z),
+      dir: new THREE.Vector3(a * dx + b * dy + c * dz, d * dx + e * dy + ff * dz, g * dx + h * dy + i * dz).normalize(),
+    });
   return out;
 }
 

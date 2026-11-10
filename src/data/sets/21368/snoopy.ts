@@ -126,4 +126,88 @@ step(11, 17, legs);
 // step that joins it to the hip sub-build built in steps 13–19.
 step(12, 17, [], "Turn the body upright: ball joint on top.");
 
+// ── Bag 1 · lower body and feet (steps 13–20), its own frame ────────────────
+// Frame axes as the manual draws it from step 15 on: long side along z (x 0..40, z 0..80 LDU),
+// the red plate's side facing +x. Levels: base 2×4 top at y 0, parts under it at y 8..16.
+sn.frame({ id: "sn-hip", label: "Snoopy's lower body", position: [0, 0, 8], rotation: [0, 0, 0] });
+sn.use("sn-hip");
+type V3 = [number, number, number];
+const cross = (a: V3, b: V3): V3 => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const neg = (a: V3): V3 => [-a[0], -a[1], -a[2]];
+/** The one right-handed choice among two (part x, part z) assignments, studs along `up`. */
+function either(up: V3, ...opts: [V3, V3][]) {
+  const [x] = opts.find(([x, z]) => cross(x, up).every((v, i) => Math.abs(v - z[i]) < 1e-9))!;
+  return orient(x, up);
+}
+const ALONG_Z = orient([0, 0, 1], [0, 1, 0]); // part x → +z, studs up
+// 13 · built upside down: 2×4 plate, red 1×2 on its underside (centre of the red side).
+const hipBase = raw("3020", W, [20, 0, 40], ALONG_Z);
+const hipRed = raw("3023", "red", [30, 8, 40], ALONG_Z);
+step(13, 18, [hipBase, hipRed]);
+// 14 · two rounded-corner plates (79491: rounded cell diagonal to its 1×1 cut-out) fill the rest
+// of the underside; each cut-out takes the red plate, so the rounded corners end up at the back.
+const hipL = raw("79491", W, [10, 8, 70], orient([0, 0, -1], [0, 1, 0]));
+const hipR = raw("79491", W, [10, 8, 10], orient([1, 0, 0], [0, 1, 0]));
+step(14, 18, [hipL, hipR]);
+// 15 · turned over. 1×1 plate front-left, 1×2 with vertical clip across the block at z 50 (clip
+// out the front), rounded-corner plate on the right end: rounded front corner at z 30, cut-out
+// in the back-right corner.
+const hip11 = raw("3024", W, [30, -8, 70]);
+const hipClip = raw("78256", W, [20, -8, 50]);
+const hipTop = raw("79491", W, [30, -8, 30], orient([-1, 0, 0], [0, 1, 0]));
+step(15, 18, [hip11, hipClip, hipTop]);
+// 16 · 2× bracket 1×2 with 1×2 vertical studs (LDraw 4585, turned so its studded face is the
+// horizontal arm and its plate the upright slab): a 1×1 plate under the arm cell next to the slab,
+// a 1×1 tile on that cell. Both arms run front-to-back with the slab behind the base's back edge,
+// on the two end columns; the 1×1 plates take the base's two open studs, the arms' front cells
+// sit on the top layer.
+const S16 = orient([0, 0, -1], [1, 0, 0]); // arm (part −y) → +x, face studs (part −z) up
+const s16: ReturnType<typeof raw>[] = [];
+for (const z of [70, 10]) {
+  const under = raw("3024", W, [10, -8, z]);
+  const br = raw("4585", W, [0, -12, z], S16);
+  const tile = raw("3070b", W, [10, -24, z]);
+  s16.push(under, br, tile);
+}
+step(16, 19, s16);
+// 17 · 2×4 plate on the two bracket arms' front studs, overhanging the front by one row.
+const hipTopPlate = raw("3020", W, [40, -24, 40], ALONG_Z);
+step(17, 19, [hipTopPlate]);
+// 18 · on it: 2×2 plate with 2 studs (studs on the back row) in the middle, quarter-round tiles
+// on the back corners, 1×1 tiles on the front corners.
+const UPV: V3 = [0, 1, 0];
+const s18 = [
+  raw("33909", W, [40, -32, 40], orient([0, 0, 1], UPV)),
+  raw("25269", W, [30, -32, 70], either(UPV, [[-1, 0, 0], [0, 0, -1]], [[0, 0, 1], [1, 0, 0]])),
+  raw("25269", W, [30, -32, 10], either(UPV, [[-1, 0, 0], [0, 0, 1]], [[0, 0, -1], [1, 0, 0]])),
+  raw("3070b", W, [50, -32, 70]),
+  raw("3070b", W, [50, -32, 10]),
+];
+step(18, 19, s18);
+// 19–20 · the feet, each built lying down and pressed into one bracket slab's back.
+// Foot coordinates: k 0..4 along its length, v 0 (stud row) / 1 (rounded side), w height above
+// its bottom plates. Upright on the slab: length down the slab (k 2 and 3 on the slab's sockets),
+// studs toward the body (+x), rounded side outward (z away from the block).
+function foot(n: number, zc: number, s: 1 | -1) {
+  const at = (k: number, v: number, w: number): V3 => [-24 + w, -62 + 20 * k, zc + 20 * s * v];
+  const U: V3 = [0, -1, 0]; // +k (LDraw +y = scene down)
+  const V: V3 = [0, 0, s];
+  const Wd: V3 = [1, 0, 0]; // foot studs
+  // 2×2 wedge plate (26601): its cut corner (part +x, −z) at the foot's rounded ends.
+  const wedge = (k: number, toward: V3) => raw("26601", W, at(k, 0.5, 0), either(Wd, [toward, neg(V)], [V, neg(toward)]));
+  // curved 2×2 corner brick (5846): stud cell at the part origin, rounded corner at part (−x, −z).
+  const corner = (k: number, out: V3) => raw("5846", W, at(k, 0, 24), either(Wd, [neg(out), neg(V)], [neg(V), neg(out)]));
+  const b1 = raw("3023", W, at(2, 0.5, 0), orient(V, Wd));
+  const p13 = raw("3623", W, at(2, 0, 8), orient(U, Wd));
+  const wl = wedge(0.5, neg(U));
+  const wr = wedge(3.5, U);
+  const mid = raw("5841", W, at(2, 0, 24), orient(cross(Wd, neg(V)), Wd)); // curved cell at part −z → rounded side
+  const cl = corner(1, neg(U));
+  const cr = corner(3, U);
+  const tile = raw("3070b", W, at(1, 0, 24), orient(V, Wd));
+  step(n, n === 19 ? 20 : 21, [b1, p13, wl, wr, mid, cl, cr, tile]);
+}
+foot(19, 70, 1);
+foot(20, 10, -1);
+
 export { BACK, FRONT, LEFT, RIGHT };
