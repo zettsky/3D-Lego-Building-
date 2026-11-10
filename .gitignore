@@ -9,3 +9,6 @@ coverage/
 next-env.d.ts
 *.tsbuildinfo
 .ldraw/
+
+# data pipeline: local database, downloads, reports, blob store (never commit LEGO assets)
+.data/

@@ -1,0 +1,4 @@
+rel_type,child_part_num,parent_part_num
+M,3003,3001
+Z,3001,3003
+P,nope,3001
