@@ -75,14 +75,20 @@ export function SetDetails({ id }: { id: string }) {
             <h1 className="font-serif text-4xl leading-tight tracking-tight sm:text-5xl">{set.name}</h1>
             <div className="flex flex-wrap gap-2">
               <StatusTag interactive={!!interactive} />
-              {set.official ? <Tag>Official set · catalog data</Tag> : <Tag tone="terracotta">Tsumiki original</Tag>}
+              {set.official ? <Tag>{set.instruction ? "Official set · from its manual" : "Official set · catalog data"}</Tag> : <Tag tone="terracotta">Tsumiki original</Tag>}
             </div>
           </div>
           <p className="leading-relaxed text-ink-soft/85">{set.description}</p>
+          {set.coverage ? (
+            <p className="rounded-xl border border-dashed border-terracotta/50 bg-terracotta/5 p-3 text-sm leading-relaxed text-ink-soft">
+              <span className="label mb-1 block !text-[0.6rem] text-terracotta">What’s modelled</span>
+              {set.coverage}
+            </p>
+          ) : null}
 
           <dl className="grid grid-cols-3 overflow-hidden rounded-xl border-[1.5px] border-ink bg-card text-center">
             {[
-              ["Pieces", set.pieces.toLocaleString()],
+              ["Pieces", set.modelPieces ? `${set.modelPieces} / ${set.pieces}` : set.pieces.toLocaleString()],
               ["Steps", set.instruction ? String(set.instruction.steps.length) : "—"],
               ["Number", set.setNumber],
             ].map(([k, v]) => (

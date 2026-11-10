@@ -27,6 +27,7 @@ export type PartShape =
   | "arch" // 1-deep arch: one leg at local x = 0, curved underside
   | "round" // cylinder
   | "bracket" // plate with a vertical flange on its −Z edge
+  | "ridge" // double 45° slope, ridge along local Z
   | "grass"; // decorative plant tuft
 
 /** Side stud on a vertical face. `u` = position along the face (studs), `v` = height (plates) of the stud centre. */
@@ -149,6 +150,7 @@ export const PARTS: PartDef[] = [
   def("3040", "Slope 45° 2 × 1", "slope", 1, 2, 3, { studs: "back-row", shape: "slope" }),
   def("3039", "Slope 45° 2 × 2", "slope", 2, 2, 3, { studs: "back-row", shape: "slope" }),
   def("3037", "Slope 45° 2 × 4", "slope", 4, 2, 3, { studs: "back-row", shape: "slope" }),
+  def("3044", "Slope 45° 2 × 1 Double", "slope", 2, 1, 3, { studs: "none", shape: "ridge" }),
   def("3665", "Slope Inverted 45° 2 × 1", "slope", 1, 2, 3, { shape: "slope-inv" }),
   def("54200", "Slope 30° 1 × 1 × 2/3 (Cheese)", "slope", 1, 1, 2, { studs: "none", shape: "cheese", element: "4157124" }),
   def("85984", "Slope 30° 1 × 2 × 2/3", "slope", 1, 2, 2, { studs: "none", shape: "cheese" }),

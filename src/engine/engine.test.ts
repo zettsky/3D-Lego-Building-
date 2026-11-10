@@ -238,3 +238,72 @@ describe("estimates", () => {
     expect(instructionInventory(COTTAGE).length).toBeGreaterThan(5);
   });
 });
+
+// ── Phase 2 ────────────────────────────────────────────────────────────────
+import { SNOOPY_DOGHOUSE } from "@/data/sets/snoopyDoghouse";
+import { frameMap, frameWorldMatrix, worldBounds, type FrameDef } from "./frames";
+import { buildConnectionGraph } from "./assembly";
+import { getColor } from "./colors";
+import * as THREE from "three";
+
+describe("half-stud grid (jumper plates)", () => {
+  it("a brick offset by half a stud clutches a jumper's centre stud", () => {
+    const jumper: BrickInstance = { uid: "j", partId: "15573", colorId: "red", x: 0, y: 0, z: 0, rot: 0 };
+    const onTop: BrickInstance = { uid: "t", partId: "3005", colorId: "red", x: 0.5, y: 1, z: 0, rot: 0 };
+    expect(validateAssembly([jumper, onTop])).toEqual([]);
+    const misplaced: BrickInstance = { ...onTop, x: 0 };
+    expect(validateAssembly([jumper, misplaced]).map((i) => i.kind)).toContain("floating");
+  });
+  it("half-offset bricks still collide", () => {
+    const a: BrickInstance = { uid: "a", partId: "3004", colorId: "red", x: 0, y: 0, z: 0, rot: 0 };
+    const b: BrickInstance = { uid: "b", partId: "3004", colorId: "red", x: 1.5, y: 0, z: 0, rot: 0 };
+    expect(validateAssembly([a, b]).map((i) => i.kind)).toContain("collision");
+  });
+  it("anchored bricks (held sideways) count as supported", () => {
+    const a: BrickInstance = { uid: "a", partId: "3004", colorId: "red", x: 0, y: 5, z: 0, rot: 0, anchor: true };
+    expect(buildConnectionGraph([a]).grounded.has("a")).toBe(true);
+  });
+});
+
+describe("sub-assemblies", () => {
+  const frames: FrameDef[] = [
+    { id: "p", label: "p", position: [10, 0, 0], rotation: [0, 0, 0], staging: { position: [-10, 0, 0], rotation: [0, 0, 0] }, attachStep: 3 },
+    { id: "c", label: "c", parent: "p", position: [0, 1, 0], rotation: [Math.PI / 2, 0, 0] },
+  ];
+  it("nests transforms and switches from staging to final on the attach step", () => {
+    const fm = frameMap(frames);
+    const at = (step: number) => new THREE.Vector3().setFromMatrixPosition(frameWorldMatrix(fm, "c", step));
+    expect(at(0).toArray().map((v) => Math.round(v))).toEqual([-10, 1, 0]);
+    expect(at(3).toArray().map((v) => Math.round(v))).toEqual([10, 1, 0]);
+  });
+  it("rotated frames rotate their bounds", () => {
+    const b: BrickInstance = { uid: "x", partId: "3010", colorId: "red", x: 0, y: 0, z: 0, rot: 0, frame: "c" };
+    const box = worldBounds([b], frameMap(frames));
+    // a 1×4 brick lying on its back: 1 stud deep becomes 1 unit tall
+    expect(box.max[1] - box.min[1]).toBeCloseTo(1, 5);
+    expect(box.max[0] - box.min[0]).toBeCloseTo(4, 5);
+  });
+});
+
+describe("Snoopy's Doghouse (21368, steps 79–225)", () => {
+  it("is collision-free and fully supported in every sub-assembly at every step", () => {
+    expect(validateInstruction(SNOOPY_DOGHOUSE)).toEqual([]);
+  });
+  it("keeps the manual's step numbers in order", () => {
+    const nums = SNOOPY_DOGHOUSE.steps.map((s) => s.manualStep!);
+    expect(nums[0]).toBe(79);
+    expect(nums[nums.length - 1]).toBe(225);
+    expect([...nums].sort((a, b) => a - b)).toEqual(nums);
+  });
+  it("uses only the colours of the set's parts list", () => {
+    const used = new Set(allBricks(SNOOPY_DOGHOUSE).map((b) => getColor(b.colorId).name));
+    for (const c of used) expect(["Bright Red", "Dark Green", "Black", "White", "Medium Stone Grey", "Dark Stone Grey", "Bright Green"]).toContain(c);
+    expect(used.has("Bright Red") && used.has("Dark Green")).toBe(true);
+  });
+  it("attaches every sub-assembly within the build and stands on the lawn when finished", () => {
+    for (const f of SNOOPY_DOGHOUSE.frames!) if (f.attachStep !== undefined) expect(f.attachStep).toBeLessThan(SNOOPY_DOGHOUSE.steps.length);
+    const box = worldBounds(allBricks(SNOOPY_DOGHOUSE), frameMap(SNOOPY_DOGHOUSE.frames));
+    expect(box.min[1]).toBeGreaterThanOrEqual(-1e-6);
+    expect(box.max[0] - box.min[0]).toBeLessThan(25); // nothing left staged off to the side
+  });
+});

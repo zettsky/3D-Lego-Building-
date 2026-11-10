@@ -2,12 +2,15 @@
  * Set catalog.
  *
  * - `tsumiki-*` entries are original demo models with verified, interactive instructions.
+ * - `lego-21368` has an interactive model transcribed from its official manual (the
+ *   doghouse part of the set; see src/data/sets/snoopyDoghouse.ts).
  * - The other entries are real LEGO® sets carrying ONLY factual metadata (name, number,
  *   theme, piece count). Their instructions have NOT been processed, and no official images
  *   are bundled. They exist so search behaves realistically and so the UI can show what an
  *   unprocessed set looks like. Phase 6 replaces this file with the database.
  */
 import { COTTAGE, SPROUT } from "./models";
+import { SNOOPY_DOGHOUSE } from "./sets/snoopyDoghouse";
 import { instructionInventory } from "@/engine/instructions";
 import { totalPieces } from "@/engine/inventory";
 import type { Instruction } from "@/engine/instructions";
@@ -25,6 +28,10 @@ export interface SetEntry {
   status: "interactive" | "not-processed";
   instruction?: Instruction;
   official: boolean;
+  /** When the interactive model covers only part of the set, what it covers. */
+  coverage?: string;
+  /** Pieces in the interactive model (when it covers only part of the set). */
+  modelPieces?: number;
 }
 
 const demo = (e: Omit<SetEntry, "pieces" | "status" | "official"> & { instruction: Instruction }): SetEntry => ({
@@ -71,6 +78,23 @@ export const CATALOG: SetEntry[] = [
     description: "A tiny potted sprout for your desk. A gentle first build: a pinwheel pot, soil, a stem and three leaves.",
     instruction: SPROUT,
   }),
+  {
+    id: "lego-21368",
+    setNumber: "21368",
+    name: "Peanuts: Snoopy's Doghouse",
+    theme: "Ideas",
+    pieces: 964,
+    year: 2026,
+    keywords: ["snoopy", "peanuts", "doghouse", "woodstock", "charlie brown", "red", "house", "dog", "ideas"],
+    description:
+      "Snoopy's red doghouse on its lawn, with the fold-out night sky hidden inside. The 3D model was transcribed step by step from the official building instructions, in the manual's colours.",
+    status: "interactive",
+    instruction: SNOOPY_DOGHOUSE,
+    official: true,
+    coverage:
+      "This model covers the doghouse: manual steps 79–225 (bags 4–9). Snoopy, Woodstock, the typewriter and the campfire are not modelled yet. Hidden inner bricks are a best reading of the pictures.",
+    modelPieces: totalPieces(instructionInventory(SNOOPY_DOGHOUSE)),
+  },
   real("10281", "Bonsai Tree", "Icons", 878, 2021, ["botanical", "plant", "tree", "flowers"], "Botanical Collection"),
   real("10280", "Flower Bouquet", "Icons", 756, 2021, ["botanical", "flowers", "rose"], "Botanical Collection"),
   real("10311", "Orchid", "Icons", 608, 2022, ["botanical", "flower", "plant"], "Botanical Collection"),

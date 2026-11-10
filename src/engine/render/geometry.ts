@@ -103,6 +103,13 @@ export function partGeometry(partId: string): THREE.BufferGeometry {
       pieces.push(prism([[backStart, 0], [z1, 0], [z1, H], [z0, H], [z0, H - lip]], -W / 2, W / 2));
       break;
     }
+    case "ridge": {
+      // Profile across X (stored as z in prism space), extruded along Z, then turned.
+      const g = prism([[-W / 2, 0], [W / 2, 0], [W / 2, lip], [0, H], [-W / 2, lip]], -D / 2, D / 2);
+      g.rotateY(Math.PI / 2);
+      pieces.push(g);
+      break;
+    }
     case "cheese": {
       pieces.push(prism([[z0, 0], [z1, 0], [z1, H], [z0, Math.min(lip, H / 3)]], -W / 2, W / 2));
       break;

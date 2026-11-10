@@ -163,6 +163,12 @@ function GuidedBuilder({ set, instruction }: { set: SetEntry; instruction: Instr
                   </motion.div>
                 </AnimatePresence>
                 <span className="label text-dust">of {pad(total)}</span>
+                {instruction.steps[state.step]?.manualStep ? (
+                  <span className="label mt-1 block !text-[0.58rem] text-terracotta">
+                    Manual step {instruction.steps[state.step].manualStep}
+                    {instruction.steps[state.step].page ? ` · page ${instruction.steps[state.step].page}` : ""}
+                  </span>
+                ) : null}
               </div>
               <button className="tool lg:hidden" aria-label="Close panel" onClick={() => setPanelOpen(false)}>
                 <IconClose />
@@ -174,6 +180,7 @@ function GuidedBuilder({ set, instruction }: { set: SetEntry; instruction: Instr
                 <span className="label">Pieces this step</span>
                 <span className="label text-dust">{callout.reduce((s, l) => s + l.qty, 0)} pcs</span>
               </div>
+              {!callout.length ? <p className="text-sm text-ink-soft">No new pieces: this step attaches a part you built earlier.</p> : null}
               <ul className="grid grid-cols-2 gap-2">
                 {callout.map((l) => (
                   <li key={`${l.partId}|${l.colorId}`} className="flex items-center gap-2 rounded-lg bg-paper/70 p-1.5" title={`${getPart(l.partId).name} — ${getColor(l.colorId).name}`}>
@@ -198,7 +205,14 @@ function GuidedBuilder({ set, instruction }: { set: SetEntry; instruction: Instr
             <div className="mt-auto flex flex-col gap-2 text-xs text-dust">
               <span className="label !text-[0.55rem]">Shortcuts</span>
               <span>← → steps · Space play · R replay · G ghost · E explode · F fit · 0 reset view</span>
-              <span>Instructions: {instruction.provenance === "hand-authored" ? "hand-authored, geometry-validated" : "LDraw import, geometry-validated"}</span>
+              <span>
+                Instructions:{" "}
+                {instruction.provenance === "hand-authored"
+                  ? "hand-authored, geometry-validated"
+                  : instruction.provenance === "manual-transcription"
+                    ? "transcribed from the official manual, geometry-validated"
+                    : "LDraw import, geometry-validated"}
+              </span>
             </div>
           </div>
         </aside>
