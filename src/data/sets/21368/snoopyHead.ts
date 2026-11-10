@@ -107,7 +107,31 @@ const da = put("3024", BK, [1, 1, 1]);
 const ba = put("3002", W, [0, 1, 2], yaw(1));
 step(38, 32, [da, ba]);
 
-// TODO steps 39–78 not transcribed yet (side panel A from step 39, side B 49–60, top 61–66,
+// 39 · 1×2 plate across the free cells beyond the brick (Z 5..6); 2×3 plate beside it along the
+// panel's +Z edge, overhanging the +X edge by one stud (the manual leaves 2×4 studs free behind it).
+step(39, 33, [put("3023", W, [0, 1, 5]), put("3021", W, [2, 1, 4])]);
+// 40 · 1×4 plate along the +Z edge on both, quarter dome on the corner stud (rounded outward).
+step(40, 33, [put("3710", W, [1, 2, 5]), raw("5848", W, [20, -40, 100], orient([-1, 0, 0], [0, 1, 0]))]);
+
+// From step 41 the manual shows the panel from +x, −z (viewer: &v=1,1.1,-1).
+// 41 · 2×3 plate on the free studs (X 2..4, Z 0..3), black 1×1 brick behind it at X 2, Z 3.
+step(41, 34, [put("3005", BK, [2, 1, 3]), put("3021", W, [2, 1, 0], yaw(1))]);
+// 42 · on the 2×3's back row: black 1×2 plate against the black brick, light grey 1×1 at its end.
+step(42, 34, [put("3023", BK, [2, 2, 1], yaw(1)), put("3024", LG, [2, 2, 0])]);
+// 43 · sub-build: 1×6 plate, slope 2×1 on its end (high end out), light grey 1×1 on the slope's
+// stud; the 1×6 goes under the step-39 2×3's overhang, along the +X edge (X 4..5).
+step(43, 35, [put("3666", W, [4, 0, 0], yaw(1)), raw("15672", W, [90, -16, 20]), put("3024", LG, [4, 2, 1])]);
+
+// 44 · light grey 2×2 corner brick on the plates at X 2..4, Z 3..5, wrapped round the black
+// brick (whose stud sits in its notch, one plate lower).
+step(44, 35, [raw("2357", LG, [70, -40, 90], orient([-1, 0, 0], [0, 1, 0]))]);
+// 45 · turntable (light grey top on white base) on the 2×3 brick's Z 3..5 end.
+const ttBase = raw("3680", W, [20, -40, 80]);
+const ttTop = raw("3679", LG, [20, -40, 80]);
+join(ttTop, ttBase, "turntable");
+step(45, 36, [ttBase, ttTop]);
+
+// TODO steps 46–78 not transcribed yet (side panel A from step 39, side B 49–60, top 61–66,
 // muzzle 67–76, attach to the body's ball joint 77, ears 78). Side panel A's final mount on
 // the head's −x side studs (step 48) is also still TODO: the frame is staged at x −10.
 
