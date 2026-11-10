@@ -28,4 +28,15 @@ join(axle, red, "axle");
 join(axle, tech, "axle");
 step(2, 12, [red, tech, axle]);
 
+// 3 · brackets hanging down both long sides: 1×2–2×2 over the dark and red bricks, 1×1–2×1
+// on the technic brick's studs. Front (+z) pair shown; the back pair mirrors it (the second
+// 1×2–2×2 is the one drawn coming down onto the back row).
+const bF = put("44728", W, [0, 0, 1], yaw(2));
+const cF = put("79389", W, [2, 0, 1], yaw(2));
+// Back pair by LDraw origin: their faces hang outside the 2-stud depth, which the grid
+// footprint cannot express for a face on the −z side.
+const bB = raw("44728", W, [20, -40, 10]);
+const cB = raw("79389", W, [50, -40, 10]);
+step(3, 13, [bF, cF, bB, cB]);
+
 export { BACK, FRONT, LEFT, RIGHT };

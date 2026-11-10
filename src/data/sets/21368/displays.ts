@@ -80,11 +80,11 @@ const FACE_BACK: M3 = orient([1, 0, 0], [0, 0, -1]);
   step(232, 187, [rc, rp, rk]);
 
   // 233: bracket 1×2–1×2 (DBG) on the two middle flange studs, its second plate on top running forward
-  const mb = raw("99781", DBG, [40, 0, -44], orient([-1, 0, 0], [0, 0, -1], [0, -1, 0]));
+  const mb = raw("99781", DBG, [40, -10, -32], orient([-1, 0, 0], [0, 0, -1], [0, -1, 0]));
   step(233, 188, [mb]);
   // 234: two tiles with clip on its top studs (y = 1.2 studs)
-  const c1 = raw("15712", DBG, [30, -22, -34]);
-  const c2 = raw("15712", DBG, [50, -22, -34]);
+  const c1 = raw("15712", DBG, [30, -32, -22]);
+  const c2 = raw("15712", DBG, [50, -32, -22]);
   step(234, 188, [c1, c2]);
 }
 

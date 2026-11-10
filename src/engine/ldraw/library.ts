@@ -161,9 +161,14 @@ export function posedSockets(id: string, p: LdPose): { pos: THREE.Vector3; dir: 
   const f = ldFootprint(id);
   const [x, y, z, a, b, c, d, e, ff, g, h, i] = p;
   const out: { pos: THREE.Vector3; dir: THREE.Vector3 }[] = [];
+  // "Down" brackets: the sockets are under the top plate (z −10..10, 8 LDU below its top),
+  // not at the bottom of the hanging face.
+  const down = /^Bracket.*Down/.test(ldMeta(id)?.name ?? "");
+  const zs: number[] = down ? [0] : [];
+  if (!down) for (let sz = f.z0 + 10; sz < f.z1; sz += 20) zs.push(sz);
   for (let sx = f.x0 + 10; sx < f.x1; sx += 20)
-    for (let sz = f.z0 + 10; sz < f.z1; sz += 20) {
-      const sy = f.bottom;
+    for (const sz of zs) {
+      const sy = down ? f.top + 8 : f.bottom;
       out.push({
         pos: new THREE.Vector3(a * sx + b * sy + c * sz + x, d * sx + e * sy + ff * sz + y, g * sx + h * sy + i * sz + z),
         dir: new THREE.Vector3(b, e, h).normalize(),
