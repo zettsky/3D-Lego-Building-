@@ -75,4 +75,27 @@ const pB = raw("3024", W, [30, -10, -12], orient([1, 0, 0], [0, 0, -1], [0, 1, 0
 const sB = raw("11477", W, [20, -10, -12], orient([0, 1, 0], [0, 0, -1], [-1, 0, 0]));
 step(8, 15, [pF, sF, pB, sB]);
 
+// 9 · 2× (rounded 1×2 plate with 2 open studs; 1×1 tile on its left stud, round 1×1 plate with
+// open stud on its right stud, bar-with-clip pushed into that open stud) on the upper row
+// (y −30) of each long side, studs facing out. The bar (22.5 LDU, ending 30 below the clip
+// origin) goes down through both open studs to the bracket's face stud (z 48 front, −8 back).
+const OUT_F = orient([1, 0, 0], [0, 0, 1], [0, -1, 0]); // studs → +z
+const OUT_B = orient([1, 0, 0], [0, 0, -1], [0, 1, 0]); // studs → −z (the front turned 180° about x)
+const s9: ReturnType<typeof raw>[] = [];
+for (const [R, face, dir] of [[OUT_F, 44, 1], [OUT_B, -4, -1]] as const) {
+  const base = raw("35480", W, [20, -30, face + 8 * dir], R);
+  const tile = raw("3070b", W, [10, -30, face + 16 * dir], R);
+  const round = raw("85861", W, [30, -30, face + 16 * dir], R);
+  const clip = raw("3484", W, [30, -30, face + 34 * dir], R);
+  join(clip, round, "bar");
+  join(clip, base, "bar");
+  s9.push(base, tile, round, clip);
+}
+step(9, 16, s9);
+
+// 10 · cheese slopes on the upper stud of the 1×1–2×1 brackets, sloping down toward the base.
+const chF = raw("54200", W, [50, -30, 44], orient([-1, 0, 0], [0, 0, 1], [0, 1, 0]));
+const chB = raw("54200", W, [50, -30, -4], orient([-1, 0, 0], [0, 0, -1], [0, -1, 0]));
+step(10, 16, [chF, chB]);
+
 export { BACK, FRONT, LEFT, RIGHT };
