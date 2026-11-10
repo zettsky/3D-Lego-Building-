@@ -131,8 +131,10 @@ const ttTop = raw("3679", LG, [20, -40, 80]);
 join(ttTop, ttBase, "turntable");
 step(45, 36, [ttBase, ttTop]);
 
-// TODO steps 46–78 not transcribed yet (side panel A from step 39, side B 49–60, top 61–66,
-// muzzle 67–76, attach to the body's ball joint 77, ears 78). Side panel A's final mount on
+// TODO step 46 (three curved slopes + cheese slope over the corner brick): two readings tried
+// (slopes along Z on X 2..5, or along X on Z 3..6) each leave one slope with no stud under it at
+// the corner brick's height, so the drawing is not yet resolved. Steps 47–78 follow it.
+// Still to do after it: side panel A (47–48), side B 49–60, top 61–66, muzzle 67–76, attach to the body's ball joint 77, ears 78. Side panel A's final mount on
 // the head's −x side studs (step 48) is also still TODO: the frame is staged at x −10.
 
 export { DOWN };
