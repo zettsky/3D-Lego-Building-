@@ -107,7 +107,7 @@ export function placements(bricks: BrickInstance[], frames: Map<string, FrameDef
     const t = brickTransform(b);
     const local = new THREE.Matrix4().compose(
       new THREE.Vector3(...t.position),
-      new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), t.rotationY),
+      t.quaternion ? new THREE.Quaternion(...t.quaternion) : new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), t.rotationY),
       new THREE.Vector3(1, 1, 1),
     );
     return { brick: b, matrix: fm.clone().multiply(local) };

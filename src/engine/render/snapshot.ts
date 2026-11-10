@@ -6,7 +6,7 @@
 import * as THREE from "three";
 import { boundsCenter, boundsRadius, type BrickInstance } from "../assembly";
 import { placements, worldBounds, type FrameDef } from "../frames";
-import { brickMaterial, partGeometry, printOverlay } from "./geometry";
+import { partGeometry, partMaterial, printOverlay } from "./geometry";
 
 let renderer: THREE.WebGLRenderer | null = null;
 let failed = false;
@@ -48,7 +48,7 @@ export function snapshot(key: string, bricks: BrickInstance[], size = 160, frame
   const shift = new THREE.Matrix4().makeTranslation(-c[0], -c[1], -c[2]);
   for (const { brick, matrix } of placements(bricks, fm)) {
     const world = shift.clone().multiply(matrix);
-    const m = new THREE.Mesh(partGeometry(brick.partId), brickMaterial(brick.colorId));
+    const m = new THREE.Mesh(partGeometry(brick.partId), partMaterial(brick.partId, brick.colorId));
     m.matrixAutoUpdate = false;
     m.matrix.copy(world);
     scene.add(m);

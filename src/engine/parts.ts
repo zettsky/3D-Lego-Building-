@@ -12,6 +12,8 @@
  * `ldraw` is the LDraw part file used for import/export (src/engine/ldraw.ts).
  */
 
+import { hasLdraw, ldPartDef } from "./ldraw/library";
+
 export type PartCategory = "brick" | "plate" | "tile" | "slope" | "panel" | "arch" | "round" | "snot" | "special";
 
 /** "back-row": studs only on the local +Z row (slopes). "custom": see `studPoints`. */
@@ -28,6 +30,7 @@ export type PartShape =
   | "round" // cylinder
   | "bracket" // plate with a vertical flange on its −Z edge
   | "ridge" // double 45° slope, ridge along local Z
+  | "ldraw" // geometry from the LDraw parts library (see ldraw/library.ts)
   | "grass"; // decorative plant tuft
 
 /** Side stud on a vertical face. `u` = position along the face (studs), `v` = height (plates) of the stud centre. */
@@ -197,8 +200,9 @@ const BY_LDRAW = new Map(PARTS.map((p) => [p.ldraw.toLowerCase(), p]));
 
 export function getPart(id: string): PartDef {
   const p = BY_ID.get(id);
-  if (!p) throw new Error(`Unknown part "${id}"`);
-  return p;
+  if (p) return p;
+  if (hasLdraw(id)) return ldPartDef(id);
+  throw new Error(`Unknown part "${id}"`);
 }
 
 export function findPartByLdraw(file: string): PartDef | undefined {

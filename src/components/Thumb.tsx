@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { BrickInstance } from "@/engine/assembly";
 import type { FrameDef } from "@/engine/frames";
 import { snapshot } from "@/engine/render/snapshot";
+import { loadLdrawMeshes } from "@/engine/ldraw/meshes";
 
 /** Real 3D thumbnail rendered by the shared offscreen renderer. */
 export function Thumb({ id, bricks, size = 160, className = "", alt, frames }: { id: string; bricks: BrickInstance[]; size?: number; className?: string; alt: string; frames?: FrameDef[] }) {
@@ -10,7 +11,10 @@ export function Thumb({ id, bricks, size = 160, className = "", alt, frames }: {
   useEffect(() => {
     let alive = true;
     // Defer so many thumbnails don't block the first paint.
-    const t = window.setTimeout(() => alive && setSrc(snapshot(id, bricks, size, frames)), 0);
+    let t = 0;
+    loadLdrawMeshes().then(() => {
+      t = window.setTimeout(() => alive && setSrc(snapshot(id, bricks, size, frames)), 0);
+    });
     return () => {
       alive = false;
       window.clearTimeout(t);

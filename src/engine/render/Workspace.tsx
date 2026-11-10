@@ -10,6 +10,7 @@ import { Grid, OrbitControls } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { boundsCenter, boundsRadius, type Box3 } from "../assembly";
 import { PLATE, STUD_HEIGHT, STUD_RADIUS, type Vec3 } from "../units";
+import { useLdrawReady } from "./useLdraw";
 
 export interface WorkspaceHandle {
   reset(): void;
@@ -107,6 +108,7 @@ export const Workspace = forwardRef<WorkspaceHandle, WorkspaceProps>(function Wo
   { children, center, frame, mat = "paper", plateSize = 16, className, onPointerMissed, autoRotate = false },
   ref,
 ) {
+  const ready = useLdrawReady();
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
   const apiRef = useRef<RigApi | null>(null);
   const glRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -204,7 +206,7 @@ export const Workspace = forwardRef<WorkspaceHandle, WorkspaceProps>(function Wo
             />
           </>
         )}
-        {children}
+        {ready ? children : null}
       </group>
       <OrbitControls
         ref={controlsRef}

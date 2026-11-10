@@ -1,0 +1,5 @@
+The part geometry in meshes.json (and src/engine/ldraw/parts-meta.json) is derived from the
+LDraw Parts Library, www.ldraw.org, licensed under Creative Commons Attribution 2.0
+(CC BY 2.0, https://creativecommons.org/licenses/by/2.0/). Parts marked unofficial come from
+the LDraw Parts Tracker and may still change. LDraw is a trademark of the Estate of James Jessiman.
+LEGO® is a trademark of the LEGO Group, which does not sponsor, authorize or endorse this site.

@@ -7,7 +7,9 @@ import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { getPart, studPoints, type PartDef } from "../parts";
-import { getColor } from "../colors";
+import { findColorByLdraw, getColor } from "../colors";
+import { ldrawGeometry } from "../ldraw/meshes";
+import { LDRAW_COLOURS } from "../ldraw/library";
 import { CLEARANCE, PLATE, STUD_HEIGHT, STUD_RADIUS } from "../units";
 
 const geoCache = new Map<string, THREE.BufferGeometry>();
@@ -79,6 +81,8 @@ function prism(profile: [number, number][], x0: number, x1: number): THREE.Buffe
 }
 
 export function partGeometry(partId: string): THREE.BufferGeometry {
+  const ld = ldrawGeometry(partId);
+  if (ld) return ld;
   const hit = geoCache.get(partId);
   if (hit) return hit;
   const part = getPart(partId);
@@ -238,9 +242,39 @@ const matCache = new Map<string, THREE.MeshStandardMaterial>();
 export function brickMaterial(colorId: string): THREE.MeshStandardMaterial {
   const hit = matCache.get(colorId);
   if (hit) return hit;
-  const m = new THREE.MeshStandardMaterial({ color: new THREE.Color(getColor(colorId).hex), roughness: 0.38, metalness: 0 });
+  const c = getColor(colorId);
+  const m = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(c.hex),
+    roughness: 0.38,
+    metalness: 0,
+    transparent: c.alpha !== undefined,
+    opacity: c.alpha ?? 1,
+    side: THREE.DoubleSide,
+  });
   matCache.set(colorId, m);
   return m;
+}
+
+const fixedCache = new Map<number, THREE.MeshStandardMaterial>();
+function fixedMaterial(code: number): THREE.MeshStandardMaterial {
+  const hit = fixedCache.get(code);
+  if (hit) return hit;
+  const known = findColorByLdraw(code);
+  const c = known ? { hex: known.hex, alpha: known.alpha ?? 1 } : LDRAW_COLOURS[String(code)] ?? { hex: "#888888", alpha: 1 };
+  const m = new THREE.MeshStandardMaterial({ color: new THREE.Color(c.hex), roughness: 0.4, transparent: c.alpha < 1, opacity: c.alpha, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1 });
+  fixedCache.set(code, m);
+  return m;
+}
+
+const multiCache = new Map<string, THREE.Material[]>();
+/** Material (or one per geometry group, for printed parts) for a part in a colour. */
+export function partMaterial(partId: string, colorId: string): THREE.Material | THREE.Material[] {
+  const gc = partGeometry(partId).userData.groupColours as (number | null)[] | undefined;
+  if (!gc || (gc.length === 1 && gc[0] === null)) return brickMaterial(colorId);
+  const k = `${partId}|${colorId}`;
+  let arr = multiCache.get(k);
+  if (!arr) multiCache.set(k, (arr = gc.map((c) => (c === null ? brickMaterial(colorId) : fixedMaterial(c)))));
+  return arr;
 }
 
 /** Translucent preview material — sage when valid, terracotta when invalid or highlighted. */

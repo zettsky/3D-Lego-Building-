@@ -2,13 +2,15 @@
   "name": "tsumiki",
   "version": "0.1.0",
   "private": true,
-  "description": "Tsumiki — an interactive 3D brick-building workshop (Guided Build + Custom Build on one shared engine).",
+  "description": "Tsumiki \u2014 an interactive 3D brick-building workshop (Guided Build + Custom Build on one shared engine).",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "ldraw:fetch": "node tools/fetch-ldraw.mjs",
+    "ldraw:pack": "node tools/pack-ldraw.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",

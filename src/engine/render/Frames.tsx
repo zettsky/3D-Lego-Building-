@@ -11,7 +11,7 @@ import * as THREE from "three";
 import { createPortal, useFrame } from "@react-three/fiber";
 import { frameLocalAt, frameOrder, type FrameDef, type FrameTransform } from "../frames";
 import { brickTransform, type BrickInstance } from "../assembly";
-import { brickMaterial, partGeometry, printOverlay } from "./geometry";
+import { partGeometry, partMaterial, printOverlay } from "./geometry";
 import { getPart } from "../parts";
 
 const FrameCtx = createContext<Map<string, THREE.Group>>(new Map());
@@ -85,7 +85,8 @@ function InstancedBatch({ partId, colorId, bricks }: { partId: string; colorId: 
     const one = new THREE.Vector3(1, 1, 1);
     bricks.forEach((b, i) => {
       const t = brickTransform(b);
-      q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), t.rotationY);
+      if (t.quaternion) q.set(...t.quaternion);
+      else q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), t.rotationY);
       m.compose(new THREE.Vector3(...t.position), q, one);
       mesh.setMatrixAt(i, m);
     });
@@ -95,11 +96,11 @@ function InstancedBatch({ partId, colorId, bricks }: { partId: string; colorId: 
   const print = printOverlay(partId);
   return (
     <>
-      <instancedMesh ref={ref} args={[partGeometry(partId), brickMaterial(colorId), bricks.length]} castShadow receiveShadow raycast={() => null} />
+      <instancedMesh ref={ref} args={[partGeometry(partId), partMaterial(partId, colorId), bricks.length]} castShadow receiveShadow raycast={() => null} />
       {print
         ? bricks.map((b) => {
             const t = brickTransform(b);
-            return <mesh key={b.uid} geometry={print.geometry} material={print.material} position={t.position} rotation-y={t.rotationY} raycast={() => null} />;
+            return <mesh key={b.uid} geometry={print.geometry} material={print.material} position={t.position} rotation-y={t.quaternion ? 0 : t.rotationY} quaternion={t.quaternion} raycast={() => null} />;
           })
         : null}
     </>

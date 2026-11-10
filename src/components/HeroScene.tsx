@@ -7,6 +7,7 @@
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame } from "@react-three/fiber";
+import { useLdrawReady } from "@/engine/render/useLdraw";
 import { brickTransform, boundsCenter, sceneBounds } from "@/engine/assembly";
 import { Brick } from "@/engine/render/Brick";
 import { HERO_BRICKS } from "@/data/models";
@@ -63,6 +64,7 @@ function Assembly() {
 }
 
 export default function HeroScene() {
+  const ready = useLdrawReady();
   return (
     <Canvas
       shadows
@@ -77,7 +79,7 @@ export default function HeroScene() {
     >
       <hemisphereLight args={[0xfffaf0, 0xd8cbb4, 1.6]} />
       <directionalLight position={[6, 12, 8]} intensity={1.8} castShadow shadow-mapSize={[1024, 1024]} />
-      <Assembly />
+      {ready ? <Assembly /> : null}
       <mesh rotation-x={-Math.PI / 2} position={[0, -0.01, 0]} receiveShadow>
         <circleGeometry args={[8, 48]} />
         <shadowMaterial opacity={0.1} />

@@ -5,6 +5,7 @@
  */
 import { getPart, hasStudAt, studPoints, type PartDef } from "./parts";
 import { PLATE, type Vec3 } from "./units";
+import { poseTransform, type LdPose } from "./ldraw/library";
 
 export type Rot = 0 | 1 | 2 | 3; // quarter turns about +Y
 
@@ -26,6 +27,12 @@ export interface BrickInstance {
    * rather than by the studs below. Counts as supported for validation.
    */
   anchor?: boolean;
+  /**
+   * Free placement in LDraw form (position in LDU + 3×3 rotation, LDraw axes, −Y up) inside
+   * the brick's frame. When present it replaces x/y/z/rot for drawing and for connection
+   * checks (see connect.ts). Used for models transcribed part-by-part from manuals.
+   */
+  pose?: LdPose;
 }
 
 export interface Cell {
@@ -241,7 +248,11 @@ export function validateAssembly(bricks: BrickInstance[], bounds?: Bounds2D): As
 }
 
 /** Scene transform for a brick: geometry is centred in x/z with its bottom at y = 0. */
-export function brickTransform(b: BrickInstance): { position: Vec3; rotationY: number } {
+export function brickTransform(b: BrickInstance): { position: Vec3; rotationY: number; quaternion?: [number, number, number, number] } {
+  if (b.pose) {
+    const t = poseTransform(b.partId, b.pose);
+    return { position: t.position, rotationY: 0, quaternion: t.quaternion };
+  }
   const part = getPart(b.partId);
   const { fw, fd } = footprint(part, b.rot);
   return { position: [b.x + fw / 2, b.y * PLATE, b.z + fd / 2], rotationY: (b.rot * Math.PI) / 2 };

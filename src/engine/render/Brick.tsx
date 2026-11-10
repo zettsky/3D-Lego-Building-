@@ -8,7 +8,7 @@ import * as THREE from "three";
 import { Edges } from "@react-three/drei";
 import type { ThreeEvent } from "@react-three/fiber";
 import { brickTransform, type BrickInstance } from "../assembly";
-import { brickMaterial, partGeometry, printOverlay } from "./geometry";
+import { partGeometry, partMaterial, printOverlay } from "./geometry";
 
 export interface BrickProps {
   brick: BrickInstance;
@@ -28,15 +28,16 @@ export const Brick = forwardRef<THREE.Group, BrickProps>(function Brick(
   { brick, material, outline, selected, castShadow = true, interactive = true, onPointerOver, onPointerOut },
   ref,
 ) {
-  const { position, rotationY } = useMemo(() => brickTransform(brick), [brick]);
+  const { position, rotationY, quaternion } = useMemo(() => brickTransform(brick), [brick]);
   const geometry = partGeometry(brick.partId);
   const print = printOverlay(brick.partId);
   return (
     <group ref={ref} position={position}>
       <mesh
         geometry={geometry}
-        material={material ?? brickMaterial(brick.colorId)}
-        rotation-y={rotationY}
+        material={material ?? partMaterial(brick.partId, brick.colorId)}
+        rotation-y={quaternion ? 0 : rotationY}
+        quaternion={quaternion}
         castShadow={castShadow}
         receiveShadow
         userData={{ uid: brick.uid }}
@@ -46,7 +47,7 @@ export const Brick = forwardRef<THREE.Group, BrickProps>(function Brick(
       >
         {outline ? <Edges threshold={30} color={outline} lineWidth={selected ? 2 : 1} /> : null}
       </mesh>
-      {print && !material ? <mesh geometry={print.geometry} material={print.material} rotation-y={rotationY} raycast={noRaycast} /> : null}
+      {print && !material ? <mesh geometry={print.geometry} material={print.material} rotation-y={quaternion ? 0 : rotationY} quaternion={quaternion} raycast={noRaycast} /> : null}
     </group>
   );
 });
