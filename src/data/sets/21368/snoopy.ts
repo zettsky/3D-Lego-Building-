@@ -23,7 +23,7 @@ Object.defineProperty(torsoFrame, "attachStep", { enumerable: true, get: () => L
 sn.frame(torsoFrame);
 sn.use("torso");
 const plate = put("3021", W, [0, 0, 0]);
-const core = put("77808", DG, [0, 1, 0], yaw(1));
+const core = put("77808", "black", [0, 1, 0], yaw(1)); // black in the manual (step 1); the two dark grey ones are the lawn's
 step(1, 11, [plate, core]);
 
 const red = put("32064a", "red", [1, 1, 0], yaw(1));

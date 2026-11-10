@@ -9,6 +9,7 @@ export const lw = kit("lw");
 const { raw, step } = lw;
 
 const G = "green";
+const DBG = "dark-bluish-gray";
 type V3 = [number, number, number];
 const UPV: V3 = [0, 1, 0];
 const ALONG_Z = orient([0, 0, 1], UPV); // part x → +z, studs up
@@ -28,3 +29,28 @@ step(82, 66, [raw("3009", G, [10, -56, 80], ALONG_Z), raw("3004", G, [10, -56, 1
 step(83, 66, [raw("3010", G, [10, -80, 60], ALONG_Z), raw("3010", G, [10, -80, 140], ALONG_Z)]);
 step(84, 67, [0, 9].flatMap((c) => [raw("3024", G, [10, -48, cz(c)]), raw("87087", G, [10, -72, cz(c)], SIDE_PX)]));
 step(85, 67, [raw("79389", G, [10, -80, cz(0)]), raw("79389", G, [10, -80, cz(9)], FACE_PZ)]);
+// 86 · next course: dark grey rounded 1×2 bricks with centre bars at cells 1–2 and 7–8, 1×4 between.
+step(86, 68, [raw("77808", DBG, [10, -104, 40], ALONG_Z), raw("3010", G, [10, -104, 100], ALONG_Z), raw("77808", DBG, [10, -104, 160], ALONG_Z)]);
+// 87 · 2× (bracket 1×1–2×1 up with two 1×1 plates on its base) on the end brackets' studs, the
+// upright faces outward over the end faces.
+const FACE_UP_PZ = orient([-1, 0, 0], UPV); // 73825: face (part −z) → +z
+step(87, 68, [0, 9].flatMap((c) => [
+  raw("73825", G, [10, -88, cz(c)], c === 9 ? FACE_UP_PZ : undefined),
+  raw("3024", G, [10, -96, cz(c)]),
+  raw("3024", G, [10, -104, cz(c)]),
+]));
+// 88 · two 1×10 bricks over the whole length.
+step(88, 69, [raw("6111", G, [10, -128, 100], ALONG_Z), raw("6111", G, [10, -152, 100], ALONG_Z)]);
+// 89 · 2× down-bracket on the end studs, faces hanging over the ends.
+step(89, 69, [raw("79389", G, [10, -160, cz(0)]), raw("79389", G, [10, -160, cz(9)], FACE_PZ)]);
+// 90 · 1×6 (cells 1–6) and 1×2 (cells 7–8) bricks.
+step(90, 70, [raw("3009", G, [10, -176, 80], ALONG_Z), raw("3004", G, [10, -176, 160], ALONG_Z)]);
+// 91 · 2× (up-bracket with a 1×1 plate on its base) on the end studs.
+step(91, 70, [0, 9].flatMap((c) => [raw("73825", G, [10, -168, cz(c)], c === 9 ? FACE_UP_PZ : undefined), raw("3024", G, [10, -176, cz(c)])]));
+// 92 · top course over all ten cells: 1×4 (0–3), side-stud brick facing +x (4), 1×3 (5–7), 1×2 (8–9).
+step(92, 71, [
+  raw("3010", G, [10, -200, 40], ALONG_Z),
+  raw("87087", G, [10, -200, cz(4)], SIDE_PX),
+  raw("3622", G, [10, -200, 130], ALONG_Z),
+  raw("3004", G, [10, -200, 180], ALONG_Z),
+]);
