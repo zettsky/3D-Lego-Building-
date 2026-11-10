@@ -82,11 +82,16 @@ step(8, 15, [pF, sF, pB, sB]);
 const OUT_F = orient([1, 0, 0], [0, 0, 1], [0, -1, 0]); // studs → +z
 const OUT_B = orient([1, 0, 0], [0, 0, -1], [0, 1, 0]); // studs → −z (the front turned 180° about x)
 const s9: ReturnType<typeof raw>[] = [];
-for (const [R, face, dir] of [[OUT_F, 44, 1], [OUT_B, -4, -1]] as const) {
+// The clips grip a vertical bar (the leg handles of step 11), so their own x runs vertically.
+const CLIP_F = orient([0, -1, 0], [0, 0, 1], [-1, 0, 0]);
+const CLIP_B = orient([0, 1, 0], [0, 0, -1], [-1, 0, 0]);
+const clips: ReturnType<typeof raw>[] = [];
+for (const [R, CR, face, dir] of [[OUT_F, CLIP_F, 44, 1], [OUT_B, CLIP_B, -4, -1]] as const) {
   const base = raw("35480", W, [20, -30, face + 8 * dir], R);
   const tile = raw("3070b", W, [10, -30, face + 16 * dir], R);
   const round = raw("85861", W, [30, -30, face + 16 * dir], R);
-  const clip = raw("3484", W, [30, -30, face + 34 * dir], R);
+  const clip = raw("3484", W, [30, -30, face + 34 * dir], CR);
+  clips.push(clip);
   join(clip, round, "bar");
   join(clip, base, "bar");
   s9.push(base, tile, round, clip);
@@ -97,5 +102,24 @@ step(9, 16, s9);
 const chF = raw("54200", W, [50, -30, 44], orient([-1, 0, 0], [0, 0, 1], [0, 1, 0]));
 const chB = raw("54200", W, [50, -30, -4], orient([-1, 0, 0], [0, 0, -1], [0, -1, 0]));
 step(10, 16, [chF, chB]);
+
+// 11 · 2× leg: plate 1×2 with handle on end; inverted curved slope on its far stud, the dome
+// hanging past the plate's end; curved 2×1 slope on top over both cells. The handle clips into
+// the step-9 clip (grip centre at the clip origin, x 30, y −30, z 78 / −38), the plate lying
+// flat against the side with its studs out and the leg running +x.
+// Note: LDraw's 24201 has a stepped top (its dome cell one plate lower), so the curved slope
+// takes the raised stud only; its other socket clears the plate's near stud by 4 LDU. The
+// manual draws both arrows; the parts' real geometry allows only this fit.
+const legs: ReturnType<typeof raw>[] = [];
+for (const [k, s, zc] of [[1, 1, 78], [-1, -1, -38]] as const) {
+  // k = 1 front; k = −1 back (front turned 180° about the line y −30, z 20)
+  const plate = raw("60478", W, [60, -30, zc + 2 * s], orient([-1, 0, 0], [0, 0, k], [0, k, 0]));
+  const inv = raw("24201", W, [70, -30, zc + 10 * s], orient([0, k, 0], [0, 0, k], [1, 0, 0]));
+  const top = raw("11477", W, [60, -30, zc + 10 * s], orient([0, -k, 0], [0, 0, k], [-1, 0, 0]));
+  join(plate, clips[k === 1 ? 0 : 1], "clip");
+  join(inv, plate, "rest");
+  legs.push(plate, inv, top);
+}
+step(11, 17, legs);
 
 export { BACK, FRONT, LEFT, RIGHT };
