@@ -69,5 +69,27 @@ step(94, 72, [raw("79389", G, [cx(0), -40, 10], FACE_MX), raw("3024", G, [cx(1),
 step(95, 73, [raw("73825", G, [cx(0), -48, 10], FACE_MX), raw("3024", G, [cx(1), -48, 10]), raw("73825", G, [cx(9), -48, 10], FACE_PX), raw("3024", G, [cx(8), -48, 10])]);
 // 96 · 1×2 brick on each tower.
 step(96, 73, [raw("3004", G, [20, -72, 10]), raw("3004", G, [180, -72, 10])]);
-// TODO 97–127: from step 97 the outer cell gets a two-plate stack and the inner cell a side-stud
-// brick, which come out one plate apart while step 99 lays a 1×2 brick across both; not resolved.
+// 97 · two 1×1 plates stacked on each outer cell.
+step(97, 74, [0, 9].flatMap((c) => [raw("3024", G, [cx(c), -80, 10]), raw("3024", G, [cx(c), -88, 10])]));
+// 98 · 1×1×⅔ half-round plate with side stud on each inner cell, side stud facing +z (as tall as
+// the two plates, so step 99's bricks lie level).
+const HALF_PZ = orient([-1, 0, 0], UPV); // 3386: side stud (part −z) → +z
+step(98, 74, [raw("3386", G, [cx(1), -88, 10], HALF_PZ), raw("3386", G, [cx(8), -88, 10], HALF_PZ)]);
+// 99 · 1×2 brick on each tower.
+step(99, 75, [raw("3004", G, [20, -112, 10]), raw("3004", G, [180, -112, 10])]);
+// 100 · down-bracket on each outer cell (face over the end), 1×1 plate on each inner cell.
+step(100, 75, [raw("79389", G, [cx(0), -120, 10], FACE_MX), raw("3024", G, [cx(1), -120, 10]), raw("79389", G, [cx(9), -120, 10], FACE_PX), raw("3024", G, [cx(8), -120, 10])]);
+// 101 · 1×6×5 panel on the plate between the towers (cells 2–7); up-bracket on each outer cell,
+// 1×1 plate on each inner cell, level with the panel's top.
+step(101, 76, [
+  raw("59349", G, [100, -128, 10], orient([-1, 0, 0], UPV)), // flat face toward +z
+  raw("73825", G, [cx(0), -128, 10], FACE_MX), raw("3024", G, [cx(1), -128, 10]),
+  raw("73825", G, [cx(9), -128, 10], FACE_PX), raw("3024", G, [cx(8), -128, 10]),
+]);
+// 102 · top course: side-stud bricks (facing +z) on the outer cells, two 1×4 bricks between.
+step(102, 77, [
+  raw("87087", G, [cx(0), -152, 10], HALF_PZ), raw("3010", G, [60, -152, 10]),
+  raw("3010", G, [140, -152, 10]), raw("87087", G, [cx(9), -152, 10], HALF_PZ),
+]);
+// 103 · tiles: 1×2 on cells 0–1, 1×8 on cells 2–9.
+step(103, 77, [raw("3069b", G, [20, -160, 10]), raw("4162", G, [120, -160, 10])]);

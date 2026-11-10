@@ -86,7 +86,7 @@ Rules:
 | Snoopy: torso, legs, back, belly (bag 1) | 1–28 | 11–26 | done: torso (1–12, stands upright from 12), lower body and feet (13–20, frame `sn-hip`, attached 21), back and tail (22–26, `sn-back`, attached 27), belly (28, `sn-belly`); joins checked overlap-free against the torso |
 | Snoopy: head (bags 2–3) | 29–78 | 27–59 | steps 29–45 transcribed (side panel A partly); 46 unresolved (see TODO), 47–78 to do |
 | Woodstock | W1–W11 | 60–62 | done (roof attach pose TODO); 5648 head is the only hand-made part shape |
-| Lawn (bag 4) | 79–127 | 64–96 | steps 79–96 transcribed (first wall 79–92, second wall 93–96); 97 unresolved (see TODO in lawn.ts), 98–127 to do |
+| Lawn (bag 4) | 79–127 | 64–96 | steps 79–103 transcribed (first wall 79–92, second wall 93–103); 104 (joining the walls) onward to do |
 | Night sky (bag 5) | 128–162 | 97–116 | not started |
 | Doghouse (bags 6–9) | 163–225 | 117–174 | steps 163–177 transcribed (back wall, ceiling); 178–225 to do |
 | Typewriter display (bag 10) | 226–254 | 183–205 | steps 226–234 transcribed; 235–254 to do |
