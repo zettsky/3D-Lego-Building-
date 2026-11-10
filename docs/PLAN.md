@@ -151,9 +151,9 @@ time_submission (id PK, user_id FK NULL, set_id FK, minutes, source ENUM(self_re
 
 ## 9. Phased plan
 
-1. **Phase 1 — Design system + functional prototype** *(this commit)* — all pages, both builders, verified demo models.
-2. **Phase 2 — Engine hardening** — LDraw geometry loader, instancing, connection-point graph, sub-assemblies.
-3. **Phase 3 — Guided Build data** — per-step cameras, sub-assembly callouts, larger imported models.
+1. **Phase 1 — Design system + functional prototype** *(done)* — all pages, both builders, verified demo models.
+2. **Phase 2 — Engine hardening** *(done, with one item moved)* — sub-assemblies with their own grids and staging, half-stud lattice, ~70 parametric parts (panels, arches, inverted/cheese/curved slopes, sideways bricks, brackets), instanced rendering, and the first set transcribed from an official manual (21368, doghouse portion). The LDraw mesh loader moved to Phase 3: parametric shapes cover every part the doghouse needs, and the full LDraw library is a large download that is better paired with the import pipeline.
+3. **Phase 3 — Guided Build data** — LDraw mesh loader, per-step cameras, sub-assembly callouts, larger imported models; finish 21368 (Snoopy, Woodstock, typewriter, campfire: ball joints and hinges).
 4. **Phase 4 — Ghost/Explode** — multi-step ghosts, sub-assembly explode, connector annotations.
 5. **Phase 5 — Custom Build** — rotation around arbitrary pivots, multi-select, SNOT/Technic connections.
 6. **Phase 6 — Backend** — FastAPI + Postgres + object storage + job queue; Rebrickable sync; PDF pipeline with review UI.

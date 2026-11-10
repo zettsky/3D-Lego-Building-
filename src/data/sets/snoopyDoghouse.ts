@@ -449,12 +449,12 @@ const frames: FrameDef[] = [
   {
     id: RL, label: "Roof (left)", parent: H,
     position: [6, RIDGE_Y, 13], rotation: basis([-c, -s, 0], [-s, c, 0], [0, 0, -1]),
-    staging: { position: [-16, 0, 0], rotation: [0, 0, 0] }, attachStep: at(223),
+    staging: { position: [0, 0, -18], rotation: [0, 0, 0] }, attachStep: at(223),
   },
   {
     id: RR, label: "Roof (right)", parent: H,
     position: [6, RIDGE_Y, -1], rotation: basis([c, -s, 0], [s, c, 0], [0, 0, 1]),
-    staging: { position: [-16, 0, -18], rotation: [0, 0, 0] }, attachStep: at(223),
+    staging: { position: [13, 0, -18], rotation: [0, 0, 0] }, attachStep: at(223),
   },
 ];
 

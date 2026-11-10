@@ -23,6 +23,7 @@ Places to start:
 - `/` the landing page
 - `/build/tsumiki-cottage` Guided Build
 - `/studio/tsumiki-cottage` Custom Build
+- `/build/lego-21368` Snoopy's Doghouse, transcribed from the official manual
 - `/upload` LDraw import (export a model from the studio as `.ldr` and upload it to see the round trip)
 
 ## Stack
@@ -46,6 +47,25 @@ src/components/guided  src/components/studio   the two mode UIs
 src/data/              demo models + catalog
 src/app/               routes
 ```
+
+## Phase 2 status
+
+**Working:**
+
+- Sub-assemblies (`src/engine/frames.ts`): parts of a model built on their own grid, shown beside the model while you build them, then gliding into place on their attach step, at any orientation. This is what sideways building (SNOT), walls built lying down and angled roofs need.
+- Half-stud lattice for collisions and connections, so jumper plates and half-stud offsets work.
+- About 70 parts with real dimensions: panels, arches, inverted, cheese and curved slopes, double slopes, bricks with studs on the side, brackets, clips, round plates and tiles, grass, and a printed SNOOPY tile. Colours now use LEGO names with LDraw reference values.
+- Instanced rendering: already-placed bricks draw in one call per part and colour.
+- **LEGO Ideas 21368 Peanuts: Snoopy's Doghouse**, the doghouse portion: manual steps 79–225 (bags 4–9), 387 pieces, 116 steps, with each step's manual step number and page. The lawn panels are built upright and laid flat, the night-sky walls are built flat and stood up, and the gables, ceiling, front with the SNOOPY sign, side walls and roof panels are built separately and attached, as in the manual. Colours come from the set's parts list.
+
+**Approximate / not done:**
+
+- The doghouse was transcribed by reading the manual's pictures. Visible structure, piece types and colours follow the manual. Bricks hidden inside walls are a best reading, a few sizes were adjusted so the sub-assemblies fit together, and hinges, clips and the two quarter-circle corners are simplified. Steps with simplifications say so.
+- Snoopy, Woodstock, the typewriter and the campfire (steps 1–78 and 226 onward) are not modelled yet. They need ball joints and free-angle hinges.
+- Part shapes are parametric approximations. LDraw meshes are planned for Phase 3.
+- The manual itself is not redistributed. Only the model data derived from it is in this repository.
+
+**Tested:** 34 engine tests. The 9 new ones cover half-stud connections and collisions, sideways-held (anchored) bricks, nested sub-assembly transforms and staging, and the doghouse: no collisions or unsupported pieces in any sub-assembly at any step, manual step order, parts-list colours, and every sub-assembly attached by the end. Checked by hand in the browser: set page, Guided Build at several steps (panels laying down, the sign, the roof attaching), and Custom Build with the doghouse inventory. The production build passes.
 
 ## Phase 1 status
 

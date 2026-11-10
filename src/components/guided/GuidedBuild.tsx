@@ -7,7 +7,7 @@ import type { SetEntry } from "@/data/catalog";
 import { resolveSet } from "@/lib/sets";
 import { clearProgress, getPace, getProgress, saveProgress } from "@/lib/storage";
 import { guidedReducer, initGuided, progressPct, type GuidedState, type Speed } from "@/engine/guidedMachine";
-import { boundsAt, stepCallout, type Instruction } from "@/engine/instructions";
+import { assemblyAt, boundsAt, stepCallout, type Instruction } from "@/engine/instructions";
 import { formatRange, remainingEstimate, type Pace } from "@/engine/estimate";
 import { getPart } from "@/engine/parts";
 import { getColor } from "@/engine/colors";
@@ -77,8 +77,22 @@ function GuidedBuilder({ set, instruction }: { set: SetEntry; instruction: Instr
 
   // Suggest a camera focus for each step without taking control away.
   useEffect(() => {
-    const bricks = instruction.steps[state.step]?.bricks;
-    if (bricks?.length) ws.current?.focus(boundsAt(instruction, state.step, instruction.frames?.length ? bricks : undefined));
+    const bricks = instruction.steps[state.step]?.bricks ?? [];
+    if (instruction.frames?.length) {
+      // Sets built from sub-assemblies: frame the sub-build being worked on (or the whole
+      // model on steps that attach one). The rig gives way as soon as the user moves the camera.
+      const soFar = assemblyAt(instruction, state.step);
+      const touched = new Set(bricks.map((b) => b.frame));
+      const context = bricks.length ? soFar.filter((b) => touched.has(b.frame)) : soFar;
+      const box = boundsAt(instruction, state.step, context);
+      // keep small sub-builds from filling the screen
+      for (let k = 0; k < 3; k++) {
+        const pad = Math.max(0, 9 - (box.max[k] - box.min[k])) / 2;
+        box.min[k] -= pad;
+        box.max[k] += pad;
+      }
+      ws.current?.fit(box);
+    } else if (bricks.length) ws.current?.focus(boundsAt(instruction, state.step));
   }, [state.step, instruction]);
 
   const onAnimDone = useCallback((token: number) => dispatch({ type: "ANIM_DONE", token }), []);
