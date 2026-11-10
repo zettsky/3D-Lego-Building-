@@ -54,3 +54,20 @@ step(92, 71, [
   raw("3622", G, [10, -200, 130], ALONG_Z),
   raw("3004", G, [10, -200, 180], ALONG_Z),
 ]);
+
+// ── Second lawn wall (steps 93–96 so far): a 1×10 plate along x (cells x 0..200, cell 0 at −x),
+// towers at both ends with brackets whose faces cover the end faces (−x / +x).
+lw.frame({ id: "lw-wall2", label: "Lawn wall (second)", position: [0, 0, 16], rotation: [0, 0, 0] });
+lw.use("lw-wall2");
+const cx = (c: number) => 10 + 20 * c;
+const FACE_MX = orient([0, 0, -1], UPV); // bracket face (part −z) → −x
+const FACE_PX = orient([0, 0, 1], UPV); // → +x
+step(93, 72, [raw("4477", G, [100, -8, 10]), raw("3004", G, [20, -32, 10]), raw("3004", G, [180, -32, 10])]);
+// 94 · down-bracket on each outer cell (face over the end), 1×1 plate on each inner cell.
+step(94, 72, [raw("79389", G, [cx(0), -40, 10], FACE_MX), raw("3024", G, [cx(1), -40, 10]), raw("79389", G, [cx(9), -40, 10], FACE_PX), raw("3024", G, [cx(8), -40, 10])]);
+// 95 · up-bracket on each outer cell (face rising over the end), 1×1 plate on each inner cell.
+step(95, 73, [raw("73825", G, [cx(0), -48, 10], FACE_MX), raw("3024", G, [cx(1), -48, 10]), raw("73825", G, [cx(9), -48, 10], FACE_PX), raw("3024", G, [cx(8), -48, 10])]);
+// 96 · 1×2 brick on each tower.
+step(96, 73, [raw("3004", G, [20, -72, 10]), raw("3004", G, [180, -72, 10])]);
+// TODO 97–127: from step 97 the outer cell gets a two-plate stack and the inner cell a side-stud
+// brick, which come out one plate apart while step 99 lays a 1×2 brick across both; not resolved.
